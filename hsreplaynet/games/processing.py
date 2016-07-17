@@ -4,9 +4,9 @@ import traceback
 from io import StringIO
 from dateutil.parser import parse as dateutil_parse
 from django.core.exceptions import ValidationError
-from hearthstone.enums import GameTag
+from hearthstone.enums import CardType, GameTag
 from hsreplay.dumper import parse_log
-from hsreplaynet.cards.models import Deck
+from hsreplaynet.cards.models import Card, Deck
 from hsreplaynet.utils import deduplication_time_range, guess_ladder_season
 from hsreplaynet.utils.instrumentation import influx_metric
 from hsreplaynet.uploads.models import UploadEventStatus
@@ -161,6 +161,17 @@ def validate_parser(parser, meta):
 		if player.name is None:
 			raise UnsupportedReplay("Could not extract player information from the log.")
 
+		if not player.heroes:
+			raise UnsupportedReplay("No hero found for player %r" % (player.name))
+		player._hero = list(player.heroes)[0]
+
+		try:
+			db_hero = Card.objects.get(id=player._hero.card_id)
+		except Card.DoesNotExist:
+			raise UnsupportedReplay("Hero %r not found." % (player._hero))
+		if db_hero.type != CardType.HERO:
+			raise ValidationError("%r is not a valid hero." % (player._hero))
+
 	if not meta.get("friendly_player"):
 		id = game_tree.guess_friendly_player()
 		if not id:
@@ -181,7 +192,6 @@ def create_global_players(global_game, game_tree, meta):
 	# Fill the player metadata and objects
 	for player in game_tree.game.players:
 		player_meta = meta.get("player%i" % (player.player_id), {})
-		hero = list(player.heroes)[0]
 		decklist = player_meta.get("deck")
 		if not decklist:
 			decklist = [c.card_id for c in player.initial_deck if c.card_id]
@@ -198,8 +208,8 @@ def create_global_players(global_game, game_tree, meta):
 			account_hi=player.account_hi,
 			account_lo=player.account_lo,
 			is_ai=player.is_ai,
-			hero_id=hero.card_id,
-			hero_premium=hero.tags.get(GameTag.PREMIUM, False),
+			hero_id=player._hero.card_id,
+			hero_premium=player._hero.tags.get(GameTag.PREMIUM, False),
 			rank=player_meta.get("rank"),
 			legend_rank=player_meta.get("legend_rank"),
 			stars=player_meta.get("stars"),
