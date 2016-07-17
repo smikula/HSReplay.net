@@ -76,7 +76,7 @@ class ModelsTest(TestCase):
 	def test_al_akir(self):
 		id = "NEW1_010"
 		card = self.carddb[id]
-		obj, created = Card.objects.get_or_create_from_cardxml(card)
+		obj = Card.from_cardxml(card)
 
 		self.assertEqual(obj.id, id)
 		self.assertEqual(obj.name, "Al'Akir the Windlord")
@@ -90,7 +90,7 @@ class ModelsTest(TestCase):
 	def test_savannah_highmane(self):
 		id = "EX1_534"
 		card = self.carddb[id]
-		obj, created = Card.objects.get_or_create_from_cardxml(card)
+		obj = Card.from_cardxml(card)
 
 		self.assertEqual(obj.id, id)
 		self.assertEqual(obj.name, "Savannah Highmane")
@@ -105,7 +105,7 @@ class ModelsTest(TestCase):
 	def test_velens_chosen(self):
 		id = "GVG_010"
 		card = self.carddb[id]
-		obj, created = Card.objects.get_or_create_from_cardxml(card)
+		obj = Card.from_cardxml(card)
 
 		self.assertEqual(obj.id, id)
 		self.assertEqual(obj.name, "Velen's Chosen")

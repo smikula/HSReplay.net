@@ -26,27 +26,6 @@ class CardManager(models.Manager):
 		if cards:
 			return random.choice(cards)
 
-	def get_or_create_from_cardxml(self, card):
-		"""
-		Returns a tuple with the object and a boolean to indicate
-		whether it was created.
-		"""
-		qs = Card.objects.filter(id=card.id)
-		if qs.exists():
-			return qs.first(), False
-
-		obj = Card(id=card.id)
-
-		for k in dir(card):
-			if k.startswith("_"):
-				continue
-			# Transfer all existing CardXML attributes to our model
-			if hasattr(obj, k):
-				setattr(obj, k, getattr(card, k))
-
-		obj.save()
-		return obj, True
-
 	def get_valid_deck_list_card_set(self):
 		if not hasattr(self, "_usable_cards"):
 			card_list = Card.objects.filter(collectible=True).exclude(type=enums.CardType.HERO)
@@ -102,6 +81,21 @@ class Card(models.Model):
 
 	class Meta:
 		db_table = "card"
+
+	@classmethod
+	def from_cardxml(cls, card, save=False):
+		obj = cls(id=card.id)
+		for k in dir(card):
+			if k.startswith("_"):
+				continue
+			# Transfer all existing CardXML attributes to our model
+			if hasattr(obj, k):
+				setattr(obj, k, getattr(card, k))
+
+		if save:
+			obj.save()
+
+		return obj
 
 	def __str__(self):
 		return self.name
