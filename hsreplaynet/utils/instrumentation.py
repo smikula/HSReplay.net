@@ -21,7 +21,7 @@ def error_handler(e):
 		logger.exception(e)
 
 
-def get_tracing_id(event, context):
+def get_tracing_id(event):
 	"""
 	Returns the Authorization token as a unique identifier.
 	Used in the Lambda logging system to trace sessions.
@@ -57,18 +57,8 @@ def lambda_handler(func):
 		- Making sure all connections to the DB are closed
 	"""
 	@wraps(func)
-	def wrapper(*args, **kwargs):
-		if len(args) != 2:
-			msg = "@lambda_handler must wrap functions with two arguments. E.g. handler(event, context)"
-			raise ValueError(msg)
-
-		event = args[0]
-		context = args[1]
-		if not hasattr(context, "log_group_name"):
-			msg = "@lambda_handler has been used with a function whose second argument is not a context object."
-			raise ValueError(msg)
-
-		tracing_id = get_tracing_id(event, context)
+	def wrapper(event, context):
+		tracing_id = get_tracing_id(event)
 		os.environ["TRACING_REQUEST_ID"] = tracing_id
 		if sentry:
 			# Provide additional metadata to sentry in case the exception
@@ -83,11 +73,11 @@ def lambda_handler(func):
 		try:
 			measurement = "%s_duration_ms" % func.__name__
 			handler_start = now()
-			with influx_timer(measurement,
-							  timestamp=handler_start,
-							  is_running_as_lambda=settings.IS_RUNNING_AS_LAMBDA):
+			with influx_timer(
+				measurement, timestamp=handler_start,
+				is_running_as_lambda=settings.IS_RUNNING_AS_LAMBDA):
 
-				return func(*args, **kwargs)
+				return func(event, context)
 
 		except Exception as e:
 			logger.exception("Got an exception: %r", e)
@@ -102,7 +92,6 @@ def lambda_handler(func):
 			connection.close()
 
 	return wrapper
-
 
 
 try:
