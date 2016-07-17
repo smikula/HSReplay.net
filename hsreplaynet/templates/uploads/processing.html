@@ -9,6 +9,9 @@
 {% elif upload.status.name == "UNSUPPORTED" %}
 	<strong>This replay is not supported.</strong><br/>
 	<em>{{ upload.error }}</em>
+{% elif upload.status.name == "VALIDATION_ERROR" %}
+	<strong>The uploaded file is not a valid replay.</strong><br/>
+	<em>{{ upload.error }}</em>
 {% else %}
 	Something went wrong generating this replay. We're on it.
 {% endif %}

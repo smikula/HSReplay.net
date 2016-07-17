@@ -122,6 +122,8 @@ def process_upload_event(upload_event):
 			upload_event.status = UploadEventStatus.PARSING_ERROR
 		elif isinstance(e, UnsupportedReplay):
 			upload_event.status = UploadEventStatus.UNSUPPORTED
+		elif isinstance(e, ValidationError):
+			upload_event.status = UploadEventStatus.VALIDATION_ERROR
 		else:
 			upload_event.status = UploadEventStatus.SERVER_ERROR
 		upload_event.error = str(e)

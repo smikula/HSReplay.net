@@ -30,6 +30,7 @@ class UploadEventStatus(IntEnum):
 	PARSING_ERROR = 3
 	SUCCESS = 4
 	UNSUPPORTED = 5
+	VALIDATION_ERROR = 6
 
 
 def _generate_upload_path(instance, filename):
