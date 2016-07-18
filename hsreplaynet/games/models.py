@@ -256,10 +256,12 @@ class GameReplay(models.Model):
 	client_handle = models.IntegerField(null=True, blank=True)
 	aurora_password = models.CharField(max_length=16, blank=True)
 
+	build = models.PositiveIntegerField("Hearthstone Build", null=True, blank=True)
+
 	replay_xml = models.FileField(upload_to=_generate_upload_path)
 	hsreplay_version = models.CharField(
 		"HSReplay version",
-		max_length=20, help_text="The HSReplay spec version of the HSReplay XML file",
+		max_length=8, help_text="The HSReplay spec version of the HSReplay XML file",
 	)
 
 	# The fields below capture the preferences of the user who uploaded it.
@@ -324,7 +326,7 @@ class GameReplay(models.Model):
 		from hsreplay.document import HSReplayDocument
 
 		global_game = self.global_game
-		hsreplay_doc = HSReplayDocument.from_parser(parser, build=global_game.build)
+		hsreplay_doc = HSReplayDocument.from_parser(parser, build=self.build)
 		game_xml = hsreplay_doc.games[0]
 		game_xml.game_type = global_game.game_type
 		game_xml.id = global_game.game_handle

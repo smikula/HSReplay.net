@@ -33,9 +33,6 @@ def eligible_for_unification(meta):
 
 
 def find_or_create_global_game(game_tree, meta):
-	build = meta["build"]
-	if build is None and "stats" in meta:
-		build = meta["stats"]["meta"]["build"]
 	game_id = meta.get("game_id")
 	game_type = meta.get("game_type", 0)
 	start_time = game_tree.start_time
@@ -49,7 +46,7 @@ def find_or_create_global_game(game_tree, meta):
 	# Check if we have enough metadata to deduplicate the game
 	if eligible_for_unification(meta):
 		matches = GlobalGame.objects.filter(
-			build=build,
+			build=meta["build"],
 			game_type=game_type,
 			game_handle=game_id,
 			server_address=meta.get("server_ip"),
@@ -69,7 +66,7 @@ def find_or_create_global_game(game_tree, meta):
 		server_port=meta.get("server_port"),
 		server_version=meta.get("server_version"),
 		game_type=game_type,
-		build=build,
+		build=meta["build"],
 		match_start=start_time,
 		match_end=end_time,
 		ladder_season=ladder_season,
@@ -182,6 +179,9 @@ def validate_parser(parser, meta):
 		if not id:
 			raise ValidationError("Friendly player ID not present at upload and could not guess it.")
 		meta["friendly_player"] = id
+
+	if not meta.get("build") and "stats" in meta:
+		meta["build"] = meta["stats"]["meta"]["build"]
 
 	return game_tree
 

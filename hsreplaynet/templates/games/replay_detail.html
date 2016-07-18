@@ -70,7 +70,7 @@
 			replay_xml_url: "{{ replay.replay_xml.url|safe }}",
 		});
 		Raven.setTagsContext({
-			build: "{{ replay.global_game.build }}",
+			build: "{{ replay.build }}",
 		});
 		{% if user.is_authenticated %}
 			Raven.setUserContext({
