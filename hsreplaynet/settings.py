@@ -52,6 +52,7 @@ if not IS_RUNNING_AS_LAMBDA:
 		"allauth.socialaccount",
 		"allauth_battlenet",
 		"loginas",
+		"cloud_browser",
 	]
 
 if not DEBUG:
