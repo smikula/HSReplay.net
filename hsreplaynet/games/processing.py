@@ -51,9 +51,9 @@ def find_or_create_global_game(game_tree, meta):
 		matches = GlobalGame.objects.filter(
 			build=build,
 			game_type=game_type,
-			game_server_game_id=game_id,
-			game_server_address=meta.get("server_ip"),
-			game_server_port=meta.get("server_port"),
+			game_handle=game_id,
+			server_address=meta.get("server_ip"),
+			server_port=meta.get("server_port"),
 			match_start__range=deduplication_time_range(start_time),
 		)
 
@@ -64,9 +64,10 @@ def find_or_create_global_game(game_tree, meta):
 			return matches.first(), True
 
 	global_game = GlobalGame.objects.create(
-		game_server_game_id=game_id,
-		game_server_address=meta.get("server_ip"),
-		game_server_port=meta.get("server_port"),
+		game_handle=game_id,
+		server_address=meta.get("server_ip"),
+		server_port=meta.get("server_port"),
+		server_version=meta.get("server_version"),
 		game_type=game_type,
 		build=build,
 		match_start=start_time,
@@ -81,15 +82,15 @@ def find_or_create_global_game(game_tree, meta):
 
 
 def find_or_create_replay(global_game, meta, unified):
-	client_id = meta.get("client_id")
+	client_handle = meta.get("client_id")
 	if unified:
 		# Look for duplicate uploads
 		replays = global_game.replays.filter(
 			friendly_player_id=meta["friendly_player"],
-			game_server_client_id=client_id,
+			client_handle=client_handle,
 		)
 		if len(replays) > 1:
-			raise RuntimeError("Found multiple client_id=%r for %r" % (client_id, global_game))
+			raise RuntimeError("Found multiple handles %r for %r" % (client_handle, global_game))
 		elif replays:
 			replay = replays.first()
 			logger.info("Duplicate upload detected: %r", replay)
@@ -98,10 +99,12 @@ def find_or_create_replay(global_game, meta, unified):
 	replay = GameReplay(
 		global_game=global_game,
 		friendly_player_id=meta["friendly_player"],
-		game_server_client_id=client_id,
-		game_server_spectate_key=meta.get("spectate_key"),
-		is_spectated_game=meta.get("spectator_mode", False),
+		client_handle=client_handle,
+		aurora_password=meta.get("aurora_password", ""),
+		spectator_mode=meta.get("spectator_mode", False),
+		spectator_password=meta.get("spectator_password", ""),
 		reconnecting=meta.get("reconnecting", False),
+		resumable=meta.get("resumable"),
 	)
 
 	return replay, False

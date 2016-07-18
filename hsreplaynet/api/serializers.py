@@ -117,11 +117,14 @@ class UploadEventSerializer(serializers.Serializer):
 	queue_time = serializers.IntegerField(required=False, min_value=1, write_only=True)
 	spectator_mode = serializers.BooleanField(default=False, write_only=True)
 	reconnecting = serializers.BooleanField(default=False, write_only=True)
+	resumable = serializers.BooleanField(required=False, write_only=True)
 	server_ip = serializers.IPAddressField(required=False, write_only=True)
 	server_port = serializers.IntegerField(required=False, min_value=1, max_value=65535, write_only=True)
-	client_id = serializers.IntegerField(required=False, min_value=1, write_only=True)
-	game_id = serializers.IntegerField(required=False, min_value=1, write_only=True)
-	spectate_key = serializers.CharField(default="", write_only=True)
+	server_version = serializers.IntegerField(required=False, min_value=1, write_only=True)
+	client_handle = serializers.IntegerField(required=False, min_value=1, write_only=True)
+	game_handle = serializers.IntegerField(required=False, min_value=1, write_only=True)
+	aurora_password = serializers.CharField(required=False, write_only=True)
+	spectator_password = serializers.CharField(required=False, write_only=True)
 
 	scenario_id = serializers.IntegerField(required=False, min_value=0, write_only=True)
 
@@ -171,7 +174,7 @@ class GameReplaySerializer(serializers.ModelSerializer):
 	class Meta:
 		model = GameReplay
 		fields = (
-			"shortid", "user", "global_game", "is_spectated_game", "friendly_player_id",
+			"shortid", "user", "global_game", "spectator_mode", "friendly_player_id",
 			"replay_xml", "won", "disconnected", "reconnecting"
 		)
 		lookup_field = "shortid"

@@ -39,7 +39,7 @@ class GameReplayAdmin(admin.ModelAdmin):
 		"hsreplay_version", "replay_xml",
 	)
 	list_filter = (
-		"hsreplay_version", "is_spectated_game", "won", "disconnected",
+		"hsreplay_version", "spectator_mode", "won", "disconnected",
 		"is_deleted",
 	)
 	raw_id_fields = (
@@ -73,7 +73,7 @@ class ReplaySidesFilter(admin.SimpleListFilter):
 class GlobalGameAdmin(admin.ModelAdmin):
 	date_hierarchy = "match_start"
 	list_display = (
-		"__str__", "game_server_game_id", "game_type", "ladder_season",
+		"__str__", "game_handle", "game_type", "ladder_season",
 		"brawl_season", "scenario_id", "num_turns", "num_entities",
 	)
 	list_filter = (

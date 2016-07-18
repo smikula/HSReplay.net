@@ -47,12 +47,13 @@ class GlobalGame(models.Model):
 
 	# We believe game_id is not monotonically increasing as it appears
 	# to roll over and reset periodically.
-	game_server_game_id = models.IntegerField("Battle.net Game ID",
+	game_handle = models.IntegerField("Battle.net Game ID",
 		null=True, blank=True,
 		help_text="This is the game_id from the Net.log"
 	)
-	game_server_address = models.GenericIPAddressField(null=True, blank=True)
-	game_server_port = models.IntegerField(null=True, blank=True)
+	server_address = models.GenericIPAddressField(null=True, blank=True)
+	server_port = models.IntegerField(null=True, blank=True)
+	server_version = models.IntegerField(null=True, blank=True)
 
 	build = models.PositiveIntegerField(
 		null=True, blank=True,
@@ -237,43 +238,43 @@ class GameReplay(models.Model):
 		help_text="References the single global game that this replay shows."
 	)
 
+	# The "friendly player" is the player whose cards are at the bottom of the
+	# screen when watching a game. For spectators this is determined by which
+	# player they started spectating first (if they spectate both).
+	friendly_player_id = PlayerIDField(
+		"Friendly PlayerID",
+		null=True, help_text="PlayerID of the friendly player (1 or 2)",
+	)
+
 	# This is useful to know because replays that are spectating both players
 	# will have more data then those from a single player.
 	# For example, they will have access to the cards that are in each players hand.
 	# This is detectable from the raw logs, although we currently intend to have
 	# the client uploading the replay provide it.
-	is_spectated_game = models.BooleanField(default=False)
-
-	# The "friendly player" is the player whose cards are at the bottom of the
-	# screen when watching a game. For spectators this is determined by which
-	# player they started spectating first (if they spectate both).
-	friendly_player_id = PlayerIDField("Friendly Player ID",
-		null=True,
-		help_text="PlayerID of the friendly player (1 or 2)",
-	)
-
-	# This information is all optional and is from the Net.log ConnectAPI
-	game_server_spectate_key = models.CharField(max_length=50, null=True, blank=True)
-	game_server_client_id = models.IntegerField(null=True, blank=True)
+	spectator_mode = models.BooleanField(default=False)
+	spectator_password = models.CharField("Spectator Password", max_length=16, blank=True)
+	client_handle = models.IntegerField(null=True, blank=True)
+	aurora_password = models.CharField(max_length=16, blank=True)
 
 	replay_xml = models.FileField(upload_to=_generate_upload_path)
-	hsreplay_version = models.CharField("HSReplay version",
-		max_length=20,
-		help_text="The HSReplay spec version of the HSReplay XML file",
+	hsreplay_version = models.CharField(
+		"HSReplay version",
+		max_length=20, help_text="The HSReplay spec version of the HSReplay XML file",
 	)
 
 	# The fields below capture the preferences of the user who uploaded it.
-	is_deleted = models.BooleanField("Soft deleted",
-		default=False,
-		help_text="Indicates user request to delete the upload"
+	is_deleted = models.BooleanField(
+		"Soft deleted",
+		default=False, help_text="Indicates user request to delete the upload"
 	)
 
 	won = models.NullBooleanField()
 	disconnected = models.BooleanField(default=False)
-	reconnecting = models.BooleanField("Is reconnecting",
-		default=False,
+	reconnecting = models.BooleanField(
+		"Is reconnecting", default=False,
 		help_text="Whether the player is reconnecting to an existing game",
 	)
+	resumable = models.NullBooleanField()
 
 	visibility = IntEnumField(enum=Visibility, default=Visibility.Public)
 	hide_player_names = models.BooleanField(default=False)
@@ -326,7 +327,7 @@ class GameReplay(models.Model):
 		hsreplay_doc = HSReplayDocument.from_parser(parser, build=global_game.build)
 		game_xml = hsreplay_doc.games[0]
 		game_xml.game_type = global_game.game_type
-		game_xml.id = global_game.game_server_game_id
+		game_xml.id = global_game.game_handle
 		if self.reconnecting:
 			game_xml.reconnecting = True
 
