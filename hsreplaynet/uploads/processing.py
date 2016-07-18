@@ -7,22 +7,19 @@ http://boto3.readthedocs.io/en/latest/reference/services/sns.html#SNS.Client.pub
 import json
 import logging
 import os
-import boto3
 from django.conf import settings
 from django.utils.timezone import now
 from hsreplaynet.uploads.models import UploadEvent
 from hsreplaynet.utils.instrumentation import error_handler, influx_metric
 
 
+try:
+	import boto3
+	sns_client = boto3.client("sns")
+except ImportError:
+	sns_client = None
+
 logger = logging.getLogger(__file__)
-_sns_client = None
-
-
-def sns_client():
-	global _sns_client
-	if not _sns_client:
-		_sns_client = boto3.client("sns")
-	return _sns_client
 
 
 def queue_upload_event_for_processing(upload_event_id):
@@ -47,7 +44,7 @@ def queue_upload_event_for_processing(upload_event_id):
 		success = True
 		try:
 			logger.info("Submitting %r to SNS", message)
-			response = sns_client().publish(
+			response = sns_client.publish(
 				TopicArn=settings.SNS_PROCESS_UPLOAD_EVENT_TOPIC,
 				Message=json.dumps({"default": json.dumps(message)}),
 				MessageStructure="json"
