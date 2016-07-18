@@ -113,6 +113,8 @@ def process_upload_event(upload_event):
 	status and error/traceback as needed.
 	"""
 	upload_event.status = UploadEventStatus.PROCESSING
+	upload_event.error = ""
+	upload_event.traceback = ""
 	upload_event.save()
 
 	try:
