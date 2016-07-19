@@ -1,5 +1,5 @@
 from rest_framework.authentication import SessionAuthentication
-from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin
+from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveModelMixin
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -51,10 +51,23 @@ class UploadEventViewSet(WriteOnlyOnceViewSet):
 	serializer_class = serializers.UploadEventSerializer
 
 
-class GameReplayViewSet(RetrieveModelMixin, GenericViewSet):
+class GameReplayViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
 	queryset = GameReplay.objects.all()
 	serializer_class = serializers.GameReplaySerializer
 	lookup_field = "shortid"
+
+	def get_queryset(self):
+		queryset = self.queryset
+		user = self.request.user
+		if user.is_anonymous:
+			queryset = queryset.none()
+		elif not user.is_staff:
+			queryset = queryset.filter(user=user)
+		username = self.request.query_params.get("username", None)
+		print(username)
+		if username:
+			queryset = queryset.filter(user__username=username)
+		return queryset
 
 
 class CreateStatsSnapshotView(CreateAPIView):
