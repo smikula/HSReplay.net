@@ -102,6 +102,7 @@ def find_or_create_replay(global_game, meta, unified):
 		spectator_password=meta.get("spectator_password", ""),
 		reconnecting=meta.get("reconnecting", False),
 		resumable=meta.get("resumable"),
+		build=meta["build"],
 	)
 
 	return replay, False
