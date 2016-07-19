@@ -1,5 +1,6 @@
 {% extends "account/base.html" %}
 {% load static from staticfiles %}
+{% load web_extras %}
 
 {% block content %}
 
@@ -7,7 +8,21 @@
 	<p>
 		Signed in as <img src="{% static 'web/images/bnet.png' %}"/> <strong>{{ user }}</strong>.
 	</p>
-	<p>
 
+	<h4>API access</h4>
+	<p>
+	{% with user.auth_tokens.all as tokens %}
+
+	{% if tokens.count == 0 %}
+		You do not have any upload client associated with your account.
+		<a href="{% setting 'HDT_DOWNLOAD_URL' %}">Download Hearthstone Deck Tracker</a> and
+		claim your account from there!
+	{% elif tokens.count == 1 %}
+		You have <strong>1</strong> upload client associated with your account.
+	{% else %}
+		You have <strong>{{ tokens.count }}</strong> upload clients associated with your account.
+	{% endif %}
+
+	{% endwith %}
 	</p>
 {% endblock %}
