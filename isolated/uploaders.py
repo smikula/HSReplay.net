@@ -22,7 +22,7 @@ try:
 except ImportError:
 	s3 = object()
 
-S3_RAW_LOG_UPLOAD_BUCKET = "raw_replay_uploads_hsreplaynet"
+S3_RAW_LOG_UPLOAD_BUCKET = "hsreplaynet-raw-log-uploads"
 
 
 def generate_log_upload_address_handler(event, context):
