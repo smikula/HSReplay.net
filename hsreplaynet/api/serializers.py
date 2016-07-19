@@ -163,7 +163,7 @@ class GlobalGameSerializer(serializers.ModelSerializer):
 		model = GlobalGame
 		fields = (
 			"build", "match_start", "match_end", "game_type",
-			"ladder_season", "scenario_id", "players"
+			"ladder_season", "scenario_id", "players", "num_turns"
 		)
 
 
@@ -175,6 +175,6 @@ class GameReplaySerializer(serializers.ModelSerializer):
 		model = GameReplay
 		fields = (
 			"shortid", "user", "global_game", "spectator_mode", "friendly_player_id",
-			"replay_xml", "won", "disconnected", "reconnecting"
+			"replay_xml", "build", "won", "disconnected", "reconnecting", "visibility"
 		)
 		lookup_field = "shortid"
