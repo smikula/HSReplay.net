@@ -51,8 +51,8 @@ def generate_log_upload_address_handler(event, context):
 							  ExpiresIn=descriptor_read_expiration,
 							  HttpMethod='GET')
 
-	log_put_expiration = 60 * 60
-	# Only one hour, since if it hasn't been used by then it's unlikely to be used.
+	log_put_expiration = 60 * 60 * 24
+	# Only one day, since if it hasn't been used by then it's unlikely to be used.
 	presigned_put_url = s3.generate_presigned_url('put_object',
 							  Params={'Bucket':S3_RAW_LOG_UPLOAD_BUCKET,
 									  'Key':s3_powerlog_key},
