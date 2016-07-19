@@ -35,16 +35,18 @@ class PendingReplayOwnershipInline(admin.TabularInline):
 class GameReplayAdmin(admin.ModelAdmin):
 	actions = (set_user, )
 	list_display = (
-		"__str__", urlify("user"), urlify("global_game"),
-		"hsreplay_version", "replay_xml",
+		"__str__", urlify("user"), urlify("global_game"), "visibility",
+		"build", "client_handle", "hsreplay_version", "replay_xml",
 	)
 	list_filter = (
-		"hsreplay_version", "spectator_mode", "won", "disconnected",
-		"is_deleted",
+		"global_game__game_type", "hsreplay_version", "visibility",
+		"won", "spectator_mode", "disconnected", "reconnecting",
 	)
 	raw_id_fields = (
 		"upload_token", "user", "global_game",
 	)
+	readonly_fields = ("shortid", )
+	search_fields = ("shortid", "global_game__players__name", "user__username")
 	inlines = (UploadEventInline, PendingReplayOwnershipInline)
 
 
@@ -73,12 +75,13 @@ class ReplaySidesFilter(admin.SimpleListFilter):
 class GlobalGameAdmin(admin.ModelAdmin):
 	date_hierarchy = "match_start"
 	list_display = (
-		"__str__", "game_handle", "game_type", "ladder_season",
-		"brawl_season", "scenario_id", "num_turns", "num_entities",
+		"__str__", "match_start", "game_type", "build", "server_version",
+		"game_handle", "ladder_season", "scenario_id", "num_turns",
 	)
 	list_filter = (
 		"game_type", "ladder_season", "brawl_season", "build", ReplaySidesFilter
 	)
+	search_fields = ("replays__shortid", "players__name")
 	inlines = (GlobalGamePlayerInline, GameReplayInline)
 
 

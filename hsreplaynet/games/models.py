@@ -47,9 +47,10 @@ class GlobalGame(models.Model):
 
 	# We believe game_id is not monotonically increasing as it appears
 	# to roll over and reset periodically.
-	game_handle = models.IntegerField("Battle.net Game ID",
+	game_handle = models.IntegerField(
+		"Game handle",
 		null=True, blank=True,
-		help_text="This is the game_id from the Net.log"
+		help_text="Game ID on the Battle.net server"
 	)
 	server_address = models.GenericIPAddressField(null=True, blank=True)
 	server_port = models.IntegerField(null=True, blank=True)
@@ -60,36 +61,33 @@ class GlobalGame(models.Model):
 		help_text="Hearthstone build number the game was played on."
 	)
 
-	match_start = models.DateTimeField("Match Start Timestamp",
-		help_text="Must be a timezone aware datetime."
+	match_start = models.DateTimeField(
+		"Match start", help_text="Must be a timezone aware datetime."
 	)
 
-	match_end = models.DateTimeField("Match End Timestamp",
-		help_text="Must be a timezone aware datetime."
+	match_end = models.DateTimeField(
+		"Match end", help_text="Must be a timezone aware datetime."
 	)
 
 	# The BnetGameType enum encodes whether it's ranked or casual as well as standard or wild.
-	game_type = IntEnumField("Game Type",
-		enum=BnetGameType,
-		null=True, blank=True,
-	)
+	game_type = IntEnumField("Game type", enum=BnetGameType, null=True, blank=True)
 
 	# ladder_season is nullable since not all games are ladder games
-	ladder_season = models.IntegerField("Ladder season",
-		null=True, blank=True,
+	ladder_season = models.IntegerField(
+		"Ladder season", null=True, blank=True,
 		help_text="The season as calculated from the match start timestamp."
 	)
 
 	# Nullable, since not all replays are TBs.
 	# Will currently have no way to calculate this so it will always be null for now.
-	brawl_season = models.IntegerField("Tavern Brawl Season",
-		default=0,
-		help_text="The brawl season which increments every week the brawl changes."
+	brawl_season = models.IntegerField(
+		"Tavern Brawl season", default=0,
+		help_text="The brawl season which increments every time the brawl changes."
 	)
 
 	# Nullable, We currently have no way to discover this.
-	scenario_id = models.IntegerField("Scenario ID",
-		null=True, blank=True,
+	scenario_id = models.IntegerField(
+		"Scenario ID", null=True, blank=True,
 		help_text="ID from DBF/SCENARIO.xml or Scenario cache",
 	)
 
