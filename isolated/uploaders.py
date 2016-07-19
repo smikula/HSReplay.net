@@ -47,7 +47,7 @@ def generate_log_upload_address_handler(event, context):
 	# Authorization errors and other messages will be written back to the descriptor
 	presigned_descriptor_url = s3.generate_presigned_url('get_object',
 							  Params={'Bucket':S3_RAW_LOG_UPLOAD_BUCKET,
-									  'Key':s3_powerlog_key},
+									  'Key':s3_descriptor_key},
 							  ExpiresIn=descriptor_read_expiration,
 							  HttpMethod='GET')
 
