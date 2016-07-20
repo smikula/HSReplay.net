@@ -53,10 +53,15 @@ $(document).ready(function() {
 				.fromUrl("{{ featured_game.replay_xml.url|safe }}");
 		}
 	};
+	var trigger_resize = function() {
+		var event = new UIEvent("resize", {view: window});
+		window.dispatchEvent(event);
+	};
 	$('#feat-joust-screenshot').click(function(e) {
 		e.preventDefault();
 		$('#joust-lightbox').fadeIn();
 		joust_check();
+		trigger_resize();
 	});
 });
 
