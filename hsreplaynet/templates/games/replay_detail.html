@@ -93,6 +93,7 @@
 <script src="{% joust_static 'joust.js' %}"></script>
 <script type="text/javascript">
 	var joustEvents = [];
+	var joustTurn = null;
 	var j = function() {
 		JoustExtra.setup({
 			hearthstonejson: "{% setting 'HEARTHSTONEJSON_URL' %}",
@@ -112,6 +113,9 @@
 				{% if dsn %}Raven && Raven.captureException(error);{% endif %}
 				var message = error.message ? error.message : error;
 				console.error(message);
+			})
+			.onTurn(function(turn) {
+				joustTurn = turn;
 			})
 			{% if influx %}
 			.events(function(event, values, tags) {
