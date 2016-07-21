@@ -4,9 +4,12 @@ from ...models import Card
 
 
 class Command(BaseCommand):
-	def handle(self, *args, **options):
-		db, _ = cardxml.load()
+	def add_arguments(self, parser):
+		parser.add_argument("path", nargs="?", help="CardDefs.xml file")
 
+	def handle(self, *args, **options):
+		path = options["path"]
+		db, _ = cardxml.load(path)
 		self.stdout.write("%i cards available" % (len(db)))
 
 		qs = Card.objects.all().values_list("id")
