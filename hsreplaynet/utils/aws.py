@@ -1,12 +1,51 @@
 import json
+from django.conf import settings
 
 try:
 	import boto3
 	S3 = boto3.client("s3")
 	SNS = boto3.client("sns")
+	LAMBDA = boto3.client('lambda')
 except ImportError:
 	S3 = None
 	SNS = None
+	LAMBDA = None
+
+
+def enable_processing_raw_uploads():
+	processing_lambda = LAMBDA.get_function(FunctionName="ProcessS3CreateObjectV1")
+	S3.put_bucket_notification_configuration(
+		Bucket=settings.S3_RAW_LOG_UPLOAD_BUCKET,
+		NotificationConfiguration={
+			"LambdaFunctionConfigurations": [
+				{
+					"LambdaFunctionArn": processing_lambda["Configuration"]["FunctionArn"],
+					"Events": [
+						"s3:ObjectCreated:*"
+					],
+					"Id": "TriggerLambdaOnLogCreate",
+					"Filter": {
+						"Key": {
+							"FilterRules": [
+								{
+									"Value": "power.log",
+									"Name": "Suffix"
+								}
+							]
+						}
+					}
+				}
+			]
+		}
+	)
+
+
+def disable_processing_raw_uploads():
+	# Remove any existing event notification rules by putting an empty configuration on the bucket
+	S3.put_bucket_notification_configuration(
+		Bucket=settings.S3_RAW_LOG_UPLOAD_BUCKET,
+		NotificationConfiguration={}
+	)
 
 
 def publish_sns_message(topic, message):
