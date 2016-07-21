@@ -1,11 +1,29 @@
 import json
 from unittest.mock import MagicMock
 from hsreplaynet.utils import aws
+from datetime import datetime
+import shortuuid
 # from hsreplaynet.lambdas.uploads import process_s3_object
 from isolated import uploaders
 
 
 def test_upload(upload_event, upload_context, monkeypatch):
+	# Control the timestamp and shortid used so we can verify the correct key generation.
+	ts = datetime.now()
+	ts_path = ts.strftime("%Y/%m/%d/%H/%M")
+
+	def mock_get_timestamp():
+			return ts
+	monkeypatch.setattr(uploaders, "get_timestamp", mock_get_timestamp)
+
+	shortid = shortuuid.uuid()
+	def mock_get_shortid():
+		return shortid
+	monkeypatch.setattr(uploaders, "get_shortid", mock_get_shortid)
+
+	auth_token = upload_event["headers"]["Authorization"].split()[1]
+	expected_descriptor_key = "raw/%s/%s/%s/descriptor.json" % (ts_path, auth_token, shortid)
+
 	# Mock out S3
 	mock_s3 = MagicMock()
 	mock_s3.put_object = MagicMock()
@@ -15,7 +33,12 @@ def test_upload(upload_event, upload_context, monkeypatch):
 	# Invoke code under test
 	result = uploaders.generate_log_upload_address_handler(upload_event, upload_context)
 
-	descriptor_object_bytes = mock_s3.put_object.call_args[1]["Body"]
+	# Start verification
+	actual_put_args = mock_s3.put_object.call_args[1]
+	descriptor_key = actual_put_args["Key"]
+	assert descriptor_key == expected_descriptor_key
+
+	descriptor_object_bytes = actual_put_args["Body"]
 	descriptor = json.loads(descriptor_object_bytes.decode("utf8"))
 
 	assert "descriptor_url" in result

@@ -29,22 +29,39 @@ except ImportError:
 S3_RAW_LOG_UPLOAD_BUCKET = "hsreplaynet-raw-log-uploads"
 
 
-def generate_log_upload_address_handler(event, context):
-	logger.info(json.dumps(event, sort_keys=True, indent=4))
-	gateway_headers = event["headers"]
+def get_timestamp():
+	return datetime.now()
 
-	if "Authorization" not in gateway_headers:
+
+def get_shortid():
+	return shortuuid.uuid()
+
+
+def get_auth_token(headers):
+
+	if "Authorization" not in headers:
 		raise Exception("The Authorization Header is required.")
 
-	auth_components = gateway_headers["Authorization"].split()
+	auth_components = headers["Authorization"].split()
 	if len(auth_components) != 2:
 		raise Exception("Authorization header must have a scheme and a token.")
 
-	auth_token = auth_components[1]
+	return auth_components[1]
 
-	upload_shortid = shortuuid.uuid()
-	ts = datetime.now()
+
+def generate_log_upload_address_handler(event, context):
+	logger.info("***** EVENT INFO *****")
+	logger.info(json.dumps(event, sort_keys=True, indent=4))
+	gateway_headers = event["headers"]
+
+	auth_token = get_auth_token(gateway_headers)
+	upload_shortid = get_shortid()
+	ts = get_timestamp()
 	ts_path = ts.strftime("%Y/%m/%d/%H/%M")
+
+	logger.info("Token: %s" % auth_token)
+	logger.info("ShortID: %s" % upload_shortid)
+	logger.info("Timestamp: %s" % ts_path)
 
 	upload_metadata = json.loads(b64decode(event.pop("body")).decode("utf8"))
 
@@ -54,10 +71,15 @@ def generate_log_upload_address_handler(event, context):
 	descriptor["gateway_headers"] = gateway_headers
 
 	s3_descriptor_key = "raw/%s/%s/%s/descriptor.json" % (ts_path, auth_token, upload_shortid)
+	logger.info("S3 Descriptor Key: %s" % s3_descriptor_key)
+
 	# S3 only triggers downstream lambdas for PUTs suffixed with '...power.log'
 	s3_powerlog_key = "raw/%s/%s/%s/power.log" % (ts_path, auth_token, upload_shortid)
+	logger.info("S3 Powerlog Key: %s" % s3_powerlog_key)
 
 	descriptor["event"] = event
+	logger.info("***** COMPLETE DESCRIPTOR *****")
+	logger.info(json.dumps(descriptor, sort_keys=True, indent=4))
 
 	S3.put_object(
 		ACL="private",
@@ -78,6 +100,7 @@ def generate_log_upload_address_handler(event, context):
 		ExpiresIn=descriptor_read_expiration,
 		HttpMethod="GET"
 	)
+	logger.info("Presigned Descriptor URL:\n%s" % presigned_descriptor_url)
 
 	log_put_expiration = 60 * 60 * 24
 	# Only one day, since if it hasn't been used by then it's unlikely to be used.
@@ -90,6 +113,7 @@ def generate_log_upload_address_handler(event, context):
 		ExpiresIn=log_put_expiration,
 		HttpMethod="PUT"
 	)
+	logger.info("Presigned Put URL:\n%s" % presigned_put_url)
 
 	return {
 		"descriptor_url": presigned_descriptor_url,

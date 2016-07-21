@@ -34,24 +34,24 @@ def get_tracing_id(event):
 	Used in the Lambda logging system to trace sessions.
 	"""
 	UNKNOWN_ID = "unknown-id"
-	if "Records" in event and "Sns" in event["Records"][0]:
-		# We are in a lambda triggered via SNS
-		message = json.loads(event["Records"][0]["Sns"]["Message"])
+	if "Records" in event:
+		if "Sns" in event["Records"][0]:
+			# We are in a lambda triggered via SNS
+			message = json.loads(event["Records"][0]["Sns"]["Message"])
 
-		if "raw_key" in message:
-			# We are in a lambda to process a raw s3 upload
-			return get_token_from_key(message["raw_key"])
+			if "raw_key" in message:
+				# We are in a lambda to process a raw s3 upload
+				return get_token_from_key(message["raw_key"])
+			elif "token" in message:
+				# We are in a lambda for processing an upload event
+				return message["token"]
+			else:
+				return UNKNOWN_ID
 
-		elif "token" in message:
-			# We are in a lambda for processing an upload event
-			return message["token"]
-		else:
-			return UNKNOWN_ID
-
-	if "Records" in event and "s3" in event["Records"][0]:
-		# We are in the process_s3_object Lambda
-		s3_record = event['Records'][0]['s3']
-		return get_token_from_key(s3_record['object']['key'])
+		elif "s3" in event["Records"][0]:
+			# We are in the process_s3_object Lambda
+			s3_record = event['Records'][0]['s3']
+			return get_token_from_key(s3_record['object']['key'])
 
 	auth_header = None
 

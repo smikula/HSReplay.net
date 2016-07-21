@@ -33,6 +33,8 @@ zipped_log = encode(log.encode("utf8"), "zlib")
 response_two = requests.put(response_one["put_url"], data=zipped_log)
 
 print("Replay ID: %s" % response_one["upload_shortid"])
+print("Put URL:\n%s" % response_one["put_url"])
+print("Descriptor URL:\n%s" % response_one["descriptor_url"])
 
 descriptor = requests.get(response_one["descriptor_url"]).json()
 print(json.dumps(descriptor, sort_keys=True, indent=4))

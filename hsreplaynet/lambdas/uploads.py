@@ -29,6 +29,8 @@ def process_s3_create_handler(event, context):
 	A handler that is triggered whenever a "..power.log" suffixed object is created in S3.
 	"""
 	logger = logging.getLogger("hsreplaynet.lambdas.process_s3_create_handler")
+	logger.info("***** EVENT INFO *****")
+	logger.info(json.dumps(event, sort_keys=True, indent=4))
 
 	s3_record = event["Records"][0]["s3"]
 	raw_bucket = s3_record["bucket"]["name"]
@@ -51,7 +53,7 @@ def process_raw_upload_sns_handler(event, context):
 	process_raw_upload(raw_bucket, raw_key)
 
 
-def process_raw_upload(bucket, raw_key):
+def process_raw_upload(raw_bucket, raw_key):
 	"""A method for processing a raw upload in S3.
 
 	This will usually be invoked by process_s3_create_handler, however
@@ -64,13 +66,30 @@ def process_raw_upload(bucket, raw_key):
 	if match:
 		timestamp, token, shortid = match.groups()
 		ts = datetime.strptime(timestamp, "%Y/%m/%d/%H/%M")
-		descriptor, descriptor_key = fetch_raw_log_descriptor(timestamp, token, shortid, bucket)
+
+		logger.info("Timestamp: %s" % timestamp)
+		logger.info("AuthToken: %s" % token)
+		logger.info("ShortID: %s" % shortid)
+
+		descriptor_key = "raw/%s/%s/%s/descriptor.json" % (timestamp, token, shortid)
+		logger.info("Descriptor Key: %s" % descriptor_key)
+
+		obj = aws.S3.get_object(Bucket=raw_bucket, Key=descriptor_key)
+		descriptor = json.load(obj["Body"])
+
+		logger.info("***** COMPLETE DESCRIPTOR *****")
+		logger.info(json.dumps(descriptor, sort_keys=True, indent=4))
 
 		new_key = _generate_upload_key(ts, shortid)
 		new_bucket = settings.AWS_STORAGE_BUCKET_NAME
 
 		# First we copy the log to the proper location
-		copy_source = "%s/%s" % (bucket, raw_key)
+		copy_source = "%s/%s" % (raw_bucket, raw_key)
+
+		logger.info("*** COPY RAW LOG TO NEW LOCATION ***")
+		logger.info("SOURCE: %s" % copy_source)
+		logger.info("DESTINATION: %s/%s" % (new_bucket, new_key))
+
 		aws.S3.copy_object(
 			Bucket=new_bucket,
 			Key=new_key,
@@ -84,6 +103,9 @@ def process_raw_upload(bucket, raw_key):
 		upload_metadata["file"] = new_key
 		upload_metadata["type"] = int(UploadEventType.POWER_LOG)
 
+		logger.info("***** UPLOADED METADATA *****")
+		logger.info(json.dumps(upload_metadata, sort_keys=True, indent=4))
+
 		gateway_headers = descriptor["gateway_headers"]
 		headers = {
 			"HTTP_X_FORWARDED_FOR": descriptor["source_ip"],
@@ -91,7 +113,12 @@ def process_raw_upload(bucket, raw_key):
 			"HTTP_X_API_KEY": gateway_headers["X-Api-Key"],
 		}
 
+		logger.info("***** HEADERS *****")
+		logger.info(json.dumps(headers, sort_keys=True, indent=4))
+
 		path = descriptor["event"]["path"]
+		logger.info("REQUEST Path: %s" % path)
+
 		request = emulate_api_request(path, upload_metadata, headers)
 
 		try:
@@ -109,27 +136,28 @@ def process_raw_upload(bucket, raw_key):
 			aws.S3.put_object(
 				Key=descriptor_key,
 				Body=json.dumps(descriptor).encode("utf8"),
-				Bucket=bucket,
+				Bucket=raw_bucket,
 			)
 
 			raise
 		else:
+			logger.info("Create Upload Event Request Succeeded.")
+			logger.info("Raw log and descriptor will be deleted now.")
+
 			# If DRF returns success, then we delete the descriptor and log from raw uploads
 			aws.S3.delete_objects(
-				Bucket=bucket,
+				Bucket=raw_bucket,
 				Delete={
 					"Objects": [{"Key": raw_key}, {"Key": descriptor_key}]
 				}
 			)
 
-	return result
+		logger.info("Processing Complete.")
+		return result
 
+	else:
+		logger.info("ERROR: We failed to match against the S3 Key - no processing was done.")
 
-def fetch_raw_log_descriptor(timestamp, token, shortid, bucket):
-	descriptor_key = "raw/%s/%s/%s/descriptor.json" % (timestamp, token, shortid)
-	obj = aws.S3.get_object(Bucket=bucket, Key=descriptor_key)
-	descriptor = json.load(obj["Body"])
-	return descriptor, descriptor_key
 
 
 @instrumentation.lambda_handler
