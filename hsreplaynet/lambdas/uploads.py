@@ -130,7 +130,7 @@ def process_raw_upload(raw_bucket, raw_key):
 			logger.exception(e)
 			aws.S3.delete_object(Bucket=new_bucket, Key=new_key)
 
-			result_exception_json = json.loads(e.msg)
+			result_exception_json = json.loads(str(e))
 			descriptor["UPLOAD_ERROR"] = result_exception_json
 			descriptor["UPLOAD_ERROR_TS"] = datetime.now().isoformat()
 			aws.S3.put_object(

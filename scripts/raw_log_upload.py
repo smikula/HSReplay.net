@@ -5,6 +5,7 @@ import argparse
 import os
 import requests
 import json
+from _datetime import datetime
 from codecs import encode
 
 parser = argparse.ArgumentParser(description='Upload a raw log file.')
@@ -24,8 +25,15 @@ HEADERS = {
 	"Authorization": "Token %s" % auth_token,
 }
 
-metadata = open(args.metadata_path).read() if args.metadata_path else {}
-response_one = requests.post(HOST, metadata, headers=HEADERS).json()
+if args.metadata_path:
+	metadata = open(args.metadata_path).read()
+else:
+	metadata = {
+		"build": 13740,
+		"match_start": datetime.now().isoformat()
+	}
+
+response_one = requests.post(HOST, json=metadata, headers=HEADERS).json()
 
 log = open(args.log_path).read()
 zipped_log = encode(log.encode("utf8"), "zlib")
