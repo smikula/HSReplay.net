@@ -25,7 +25,7 @@ def upload_event():
 		"headers": {
 			"Authorization": "Token beh7141d-c437-4bfe-995e-1b3a975094b1"
 		},
-		"body" : b64encode('{"player1_rank": 5}'.encode("utf8")),
+		"body" : b64encode('{"player1_rank": 5}'.encode("utf8")).decode("ascii"),
 		"source_ip": "127.0.0.1"
 	}
 
