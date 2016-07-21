@@ -60,7 +60,7 @@ def process_raw_upload(raw_bucket, raw_key):
 	it can also be invoked when a raw upload is queued for reprocessing via SNS.
 	"""
 	logger = logging.getLogger("hsreplaynet.lambdas.process_raw_upload")
-	pattern = r"raw/(?P<ts>\d{4}/\d{2}/\d{2}/\d{2}/\d{2})/(?P<token>)[a-z0-9-]{36}/(?P<shortid>\w{22})/power.log"
+	pattern = r"raw/(?P<ts>\d{4}/\d{2}/\d{2}/\d{2}/\d{2})/(?P<token>[a-z0-9-]{36})/(?P<shortid>\w{22})/power.log"
 	match = re.match(pattern, raw_key)
 
 	if match:
