@@ -13,14 +13,20 @@
 	</style>
 {% endblock %}
 
+{% block title %}
+	<title>{{ replay }}</title>
+{% endblock title %}
+
 {% block fullcontent %}
 <div id="tabletop" class="container-fluid">
-	<div class="col-lg-offset-1 col-lg-10 col-xs-12">
-		<h1>{{ replay }}</h1>
-	</div>
-	<div class="full_height">
-		<div class="col-lg-offset-1 col-lg-10 col-xs-12 full_height">
-			<div id="joust-container" class="full_height" data-replayurl="{{ replay.replay_xml.url }}"></div>
+	<div class="row">
+		<div class="col-lg-offset-1 col-lg-10 col-xs-12">
+			<h1>{{ replay }}</h1>
+			<div class="full_height">
+				<div class="col-lg-offset-1 col-lg-10 col-xs-12 full_height">
+					<div id="joust-container" class="full_height" data-replayurl="{{ replay.replay_xml.url }}"></div>
+				</div>
+			</div>
 		</div>
 	</div>
 </div>
@@ -43,11 +49,11 @@
 					</ul>
 				</div>
 				<div class="col-lg-8 col-xs-12">
-					<h3>Players</h3>
+					<h2>Players</h2>
 					<div class="row">
 						{% for player in gg.players.all %}
 							<div class="col-lg-6 col-sm-12">
-								<h4>{{ player }}{% if player.is_ai %} (AI){% endif %} ({{ player.final_state.name|title }})</h4>
+								<h3>{{ player }}{% if player.is_ai %} (AI){% endif %} ({{ player.final_state.name|title }})</h3>
 								<ul>
 									<li>{% if player.is_first %}First player{% else %}Second player{% endif %}</li>
 									<li>Hero: {{ player.hero }}{% if player.hero_premium %} (Golden){% endif %}</li>
