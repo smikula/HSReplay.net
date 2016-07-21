@@ -6,10 +6,11 @@ from ...models import Card
 class Command(BaseCommand):
 	def add_arguments(self, parser):
 		parser.add_argument("path", nargs="?", help="CardDefs.xml file")
+		parser.add_argument("--locale", default="enUS")
 
 	def handle(self, *args, **options):
 		path = options["path"]
-		db, _ = cardxml.load(path)
+		db, _ = cardxml.load(path, locale=options["locale"])
 		self.stdout.write("%i cards available" % (len(db)))
 
 		qs = Card.objects.all().values_list("id")
