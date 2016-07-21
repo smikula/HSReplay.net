@@ -43,3 +43,4 @@ from hsreplaynet.lambdas.authorizer import api_gateway_authorizer as token_autho
 from hsreplaynet.lambdas.uploads import create_power_log_upload_event_handler
 from hsreplaynet.lambdas.uploads import process_upload_event_handler
 from hsreplaynet.lambdas.uploads import process_s3_create_handler
+from hsreplaynet.lambdas.uploads import process_raw_upload_sns_handler
