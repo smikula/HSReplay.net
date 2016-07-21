@@ -18,7 +18,8 @@ import logging
 from base64 import b64decode
 from datetime import datetime
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 try:
 	import boto3
