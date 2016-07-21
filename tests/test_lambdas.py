@@ -1,6 +1,8 @@
 import json
-from isolated import uploaders
 from unittest.mock import MagicMock
+from hsreplaynet.utils import aws
+# from hsreplaynet.lambdas.uploads import process_s3_object
+from isolated import uploaders
 
 
 def test_upload(upload_event, upload_context, monkeypatch):
@@ -24,3 +26,16 @@ def test_upload(upload_event, upload_context, monkeypatch):
 	assert "upload_shortid" in result
 	# Ensure the shortID returned is also saved to use on the upload event
 	assert descriptor["shortid"] == result["upload_shortid"]
+
+
+def test_process_s3_object(s3_create_object_event, upload_context, monkeypatch):
+	# Mock out S3
+	mock_s3 = MagicMock()
+	mock_s3.put_object = MagicMock()
+	mock_s3.get_object = MagicMock()
+
+	mock_s3.generate_presigned_url = MagicMock(return_value="[A SIGNED URL]")
+	monkeypatch.setattr(aws, "S3", mock_s3)
+
+	# Invoke code under test
+	# result = process_s3_object(s3_create_object_event, upload_context)

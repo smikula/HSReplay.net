@@ -35,13 +35,13 @@ class UploadEventStatus(IntEnum):
 
 def _generate_upload_path(instance, filename):
 	ts = now()
-	extension = UploadEventType(instance.type).extension
-	if instance.token_id:
-		token = str(instance.token_id)
-	else:
-		token = "unknown-token"
-	yymmdd = ts.strftime("%Y/%m/%d")
-	return "uploads/%s/%s/%s%s" % (yymmdd, token, ts.isoformat(), extension)
+	shortid = instance.shortid
+	return _generate_upload_key(ts, shortid)
+
+
+def _generate_upload_key(ts, shortid):
+	timestamp = ts.strftime("%Y/%m/%d/%H/%M")
+	return "uploads/%s/%s/power.log" % (timestamp, shortid)
 
 
 class UploadEvent(models.Model):

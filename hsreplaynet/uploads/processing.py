@@ -4,22 +4,43 @@ A module for scheduling UploadEvents to be processed or reprocessed.
 For additional details see:
 http://boto3.readthedocs.io/en/latest/reference/services/sns.html#SNS.Client.publish
 """
-import json
 import logging
 import os
 from django.conf import settings
 from django.utils.timezone import now
 from hsreplaynet.uploads.models import UploadEvent
 from hsreplaynet.utils.instrumentation import error_handler, influx_metric
-
-
-try:
-	import boto3
-	sns_client = boto3.client("sns")
-except ImportError:
-	sns_client = None
+from hsreplaynet.utils import aws
 
 logger = logging.getLogger(__file__)
+
+
+def queue_raw_uploads_for_processing():
+	"""Requeue all raw logs to attempt processing them into UploadEvents.
+
+	The primary use for this is for when we deploy code. The intended deploy process is:
+		- Notify S3 to suspend triggering lambda upon log upload
+		- Perform the Deploy
+		- Notify S3 to resume triggering lambda upon log upload
+		- Invoke this function to queue for processing any logs uploaded during the deploy
+
+	This method can also be used to recover from a service outage.
+	"""
+	# Note, this method is intended to only be run in production.
+	if settings.IS_RUNNING_LIVE:
+
+		for object in aws.list_all_objects_in(settings.S3_RAW_LOG_UPLOAD_BUCKET, prefix="raw"):
+
+			key = object["Key"]
+			if key.endswith("power.log"): # Don't queue the descriptor files, just the logs.
+
+				message = {
+					"raw_bucket": settings.S3_RAW_LOG_UPLOAD_BUCKET,
+					"raw_key": key,
+				}
+
+				response = aws.publish_sns_message(settings.SNS_PROCESS_RAW_LOG_UPOAD_TOPIC, message)
+
 
 
 def queue_upload_event_for_processing(upload_event_id):
@@ -44,11 +65,7 @@ def queue_upload_event_for_processing(upload_event_id):
 		success = True
 		try:
 			logger.info("Submitting %r to SNS", message)
-			response = sns_client.publish(
-				TopicArn=settings.SNS_PROCESS_UPLOAD_EVENT_TOPIC,
-				Message=json.dumps({"default": json.dumps(message)}),
-				MessageStructure="json"
-			)
+			response = aws.publish_sns_message(settings.SNS_PROCESS_UPLOAD_EVENT_TOPIC, message)
 			logger.info("SNS Response: %s" % str(response))
 		except Exception as e:
 			logger.error("Exception raised.")

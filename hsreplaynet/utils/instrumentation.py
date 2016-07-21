@@ -1,6 +1,7 @@
 import json
 import os
 import time
+import re
 from contextlib import contextmanager
 from functools import wraps
 from django.conf import settings
@@ -21,15 +22,36 @@ def error_handler(e):
 		logger.exception(e)
 
 
+def get_token_from_key(key):
+	RAW_KEY_PATTERN = r"raw/(?P<timestamp>\d{4}/\d{2}/\d{2}/\d{2}/\d{2})/(?P<token>)[a-z0-9-]{36}/(?P<shortid>\w{22})/power.log"
+	match = re.match(RAW_KEY_PATTERN, key)
+	return match.groupdict()["token"]
+
+
 def get_tracing_id(event):
 	"""
 	Returns the Authorization token as a unique identifier.
 	Used in the Lambda logging system to trace sessions.
 	"""
-	if "Records" in event:
-		# We are in the processing lambda
+	UNKNOWN_ID = "unknown-id"
+	if "Records" in event and "Sns" in event["Records"][0]:
+		# We are in a lambda triggered via SNS
 		message = json.loads(event["Records"][0]["Sns"]["Message"])
-		return message["token"]
+
+		if "raw_key" in message:
+			# We are in a lambda to process a raw s3 upload
+			return get_token_from_key(message["raw_key"])
+
+		elif "token" in message:
+			# We are in a lambda for processing an upload event
+			return message["token"]
+		else:
+			return UNKNOWN_ID
+
+	if "Records" in event and "s3" in event["Records"][0]:
+		# We are in the process_s3_object Lambda
+		s3_record = event['Records'][0]['s3']
+		return get_token_from_key(s3_record['object']['key'])
 
 	auth_header = None
 
@@ -45,7 +67,7 @@ def get_tracing_id(event):
 		# The auth header is in the format 'Token <id>'
 		return auth_header.split()[1]
 
-	return "unknown-id"
+	return UNKNOWN_ID
 
 
 def lambda_handler(func):
@@ -144,8 +166,6 @@ def influx_timer(measure, timestamp=None, **kwargs):
 	Reports the duration of the context manager.
 	Additional kwargs are passed to InfluxDB as tags.
 	"""
-	if influx is None:
-		return
 	start_time = time.clock()
 	exception_raised = False
 	if timestamp is None:
@@ -170,4 +190,5 @@ def influx_timer(measure, timestamp=None, **kwargs):
 		}
 
 		payload["time"] = timestamp.isoformat()
-		influx_write_payload([payload])
+		if influx:
+			influx_write_payload([payload])

@@ -14,6 +14,7 @@ the rest of the hsreplaynet codebase.
 """
 import json
 import shortuuid
+from base64 import b64decode
 from datetime import datetime
 
 
@@ -22,20 +23,38 @@ try:
 	S3 = boto3.client("s3")
 except ImportError:
 	S3 = None
+
 S3_RAW_LOG_UPLOAD_BUCKET = "hsreplaynet-raw-log-uploads"
 
 
 def generate_log_upload_address_handler(event, context):
+	gateway_headers = event["headers"]
+
+	if "Authorization" not in gateway_headers:
+		raise Exception("The Authorization Header is required.")
+
+	auth_components = gateway_headers["Authorization"].split()
+	if len(auth_components) != 2:
+		raise Exception("Authorization header must have a scheme and a token.")
+
+	auth_token = auth_components[1]
+
 	upload_shortid = shortuuid.uuid()
 	ts = datetime.now()
 	ts_path = ts.strftime("%Y/%m/%d/%H/%M")
 
-	s3_descriptor_key = "raw/%s/%s/descriptor.json" % (ts_path, upload_shortid)
-	# S3 only triggers downstream lambdas for PUTs suffixed with '...power.log'
-	s3_powerlog_key = "raw/%s/%s/power.log" % (ts_path, upload_shortid)
+	upload_metadata = json.loads(b64decode(event.pop("body")).decode("utf8"))
 
 	descriptor = {"shortid": upload_shortid}
-	descriptor.update(event)
+	descriptor["upload_metadata"] = upload_metadata
+	descriptor["source_ip"] = event["source_ip"]
+	descriptor["gateway_headers"] = gateway_headers
+
+	s3_descriptor_key = "raw/%s/%s/%s/descriptor.json" % (ts_path, auth_token, upload_shortid)
+	# S3 only triggers downstream lambdas for PUTs suffixed with '...power.log'
+	s3_powerlog_key = "raw/%s/%s/%s/power.log" % (ts_path, auth_token, upload_shortid)
+
+	descriptor["event"] = event
 
 	S3.put_object(
 		ACL="private",

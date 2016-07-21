@@ -1,19 +1,150 @@
 import json
 import logging
 import tempfile
+import re
+from datetime import datetime
 from base64 import b64decode
+from django.conf import settings
 from django.contrib.sessions.middleware import SessionMiddleware
 from rest_framework.test import APIRequestFactory
 from hsreplaynet.api.views import UploadEventViewSet
-from hsreplaynet.uploads.models import UploadEvent, UploadEventType
+from hsreplaynet.uploads.models import UploadEvent, UploadEventType, _generate_upload_key
 from hsreplaynet.uploads.processing import queue_upload_event_for_processing
-from hsreplaynet.utils import instrumentation
+from hsreplaynet.utils import instrumentation, aws
 
 
-def create_fake_api_request(event, body):
+def emulate_api_request(path, data, headers):
 	"""
 	Emulates an API request from the API gateway's data.
 	"""
+	factory = APIRequestFactory()
+	request = factory.post(path, data, **headers)
+	SessionMiddleware().process_request(request)
+	return request
+
+
+@instrumentation.lambda_handler
+def process_s3_create_handler(event, context):
+	"""
+	A handler that is triggered whenever a "..power.log" suffixed object is created in S3.
+	"""
+	logger = logging.getLogger("hsreplaynet.lambdas.process_s3_create_handler")
+
+	s3_record = event["Records"][0]["s3"]
+	raw_bucket = s3_record["bucket"]["name"]
+	raw_key = s3_record["object"]["key"]
+	logger.info("S3 Upload Event >> Bucket: %s Key: %s ", raw_bucket, raw_key)
+	process_raw_upload(raw_bucket, raw_key)
+
+
+@instrumentation.lambda_handler
+def process_raw_upload_sns_handler(event, context):
+	"""
+	A handler that subscribes to an SNS queue to support reprocessing of raw log uploads.
+	"""
+	logger = logging.getLogger("hsreplaynet.lambdas.process_raw_upload_sns_handler")
+
+	message = json.loads(event["Records"][0]["Sns"]["Message"])
+	logger.info("SNS message: %r", message)
+	raw_bucket = message["raw_bucket"]
+	raw_key = message["raw_key"]
+	process_raw_upload(raw_bucket, raw_key)
+
+
+def process_raw_upload(bucket, raw_key):
+	"""A method for processing a raw upload in S3.
+
+	This will usually be invoked by process_s3_create_handler, however
+	it can also be invoked when a raw upload is queued for reprocessing via SNS.
+	"""
+	logger = logging.getLogger("hsreplaynet.lambdas.process_raw_upload")
+	pattern = r"raw/(?P<ts>\d{4}/\d{2}/\d{2}/\d{2}/\d{2})/(?P<token>)[a-z0-9-]{36}/(?P<shortid>\w{22})/power.log"
+	match = re.match(pattern, raw_key)
+
+	if match:
+		timestamp, token, shortid = match.groups()
+		ts = datetime.strptime(timestamp, "%Y/%m/%d/%H/%M")
+		descriptor, descriptor_key = fetch_raw_log_descriptor(timestamp, token, shortid, bucket)
+
+		new_key = _generate_upload_key(ts, shortid)
+		new_bucket = settings.AWS_STORAGE_BUCKET_NAME
+
+		# First we copy the log to the proper location
+		copy_source = "%s/%s" % (bucket, raw_key)
+		aws.S3.copy_object(
+			Bucket=new_bucket,
+			Key=new_key,
+			CopySource=copy_source,
+		)
+
+		# Then we build the request and send it to DRF
+		# If "file" is a string, DRF will interpret as a S3 Key
+		upload_metadata = descriptor["upload_metadata"]
+		upload_metadata["shortid"] = descriptor["shortid"]
+		upload_metadata["file"] = new_key
+		upload_metadata["type"] = int(UploadEventType.POWER_LOG)
+
+		gateway_headers = descriptor["gateway_headers"]
+		headers = {
+			"HTTP_X_FORWARDED_FOR": descriptor["source_ip"],
+			"HTTP_AUTHORIZATION": gateway_headers["Authorization"],
+			"HTTP_X_API_KEY": gateway_headers["X-Api-Key"],
+		}
+
+		path = descriptor["event"]["path"]
+		request = emulate_api_request(path, upload_metadata, headers)
+
+		try:
+			result = create_upload_event_from_request(request)
+		except Exception as e:
+			# If DRF fails: delete the copy of the log, and update the descriptor.
+			# We update the descriptor as a way to pass status
+			# info back to the client that uploaded it.
+			logger.exception(e)
+			aws.S3.delete_object(Bucket=new_bucket, Key=new_key)
+
+			result_exception_json = json.loads(e.msg)
+			descriptor["UPLOAD_ERROR"] = result_exception_json
+			descriptor["UPLOAD_ERROR_TS"] = datetime.now().isoformat()
+			aws.S3.put_object(
+				Key=descriptor_key,
+				Body=json.dumps(descriptor).encode("utf8"),
+				Bucket=bucket,
+			)
+
+			raise
+		else:
+			# If DRF returns success, then we delete the descriptor and log from raw uploads
+			aws.S3.delete_objects(
+				Bucket=bucket,
+				Delete={
+					"Objects": [{"Key": raw_key}, {"Key": descriptor_key}]
+				}
+			)
+
+	return result
+
+
+def fetch_raw_log_descriptor(timestamp, token, shortid, bucket):
+	descriptor_key = "raw/%s/%s/%s/descriptor.json" % (timestamp, token, shortid)
+	obj = aws.S3.get_object(Bucket=bucket, Key=descriptor_key)
+	descriptor = json.load(obj["Body"])
+	return descriptor, descriptor_key
+
+
+@instrumentation.lambda_handler
+def create_power_log_upload_event_handler(event, context):
+	"""
+	A handler for creating UploadEvents via Lambda.
+	"""
+	logger = logging.getLogger("hsreplaynet.lambdas.create_power_log_upload_event_handler")
+
+	body = event.pop("body")
+	logger.info("source_ip=%r, query=%r", event["source_ip"], event["query"])
+
+	body = b64decode(body)
+	instrumentation.influx_metric("raw_power_log_upload_num_bytes", {"size": len(body)})
+
 	file = tempfile.NamedTemporaryFile(mode="r+b", suffix=".log")
 	file.write(body)
 	file.flush()
@@ -23,35 +154,21 @@ def create_fake_api_request(event, body):
 	data["file"] = file
 	data["type"] = int(UploadEventType.POWER_LOG)
 
-	headers = event["headers"]
-	extra = {
+	gateway_headers = event["headers"]
+	headers = {
 		"HTTP_X_FORWARDED_FOR": event["source_ip"],
-		"HTTP_AUTHORIZATION": headers["Authorization"],
-		"HTTP_X_API_KEY": headers["X-Api-Key"],
+		"HTTP_AUTHORIZATION": gateway_headers["Authorization"],
+		"HTTP_X_API_KEY": gateway_headers["X-Api-Key"],
 	}
 
-	factory = APIRequestFactory()
-	request = factory.post(event["path"], data, **extra)
-	SessionMiddleware().process_request(request)
-	return request
+	path = event["path"]
+	request = emulate_api_request(path, data, headers)
+	return create_upload_event_from_request(request)
 
 
-@instrumentation.lambda_handler
-def create_power_log_upload_event_handler(event, context):
-	"""
-	A handler for creating UploadEvents via Lambda.
-	"""
-	logger = logging.getLogger("hsreplaynet.lambdas.upload_handling")
-
-	body = event.pop("body")
-	logger.info("source_ip=%r, query=%r", event["source_ip"], event["query"])
-
-	body = b64decode(body)
-	instrumentation.influx_metric("raw_power_log_upload_num_bytes", {"size": len(body)})
-
-	request = create_fake_api_request(event, body)
+def create_upload_event_from_request(request):
+	logger = logging.getLogger("hsreplaynet.lambdas.create_upload_event_from_request")
 	view = UploadEventViewSet.as_view({"post": "create"})
-
 	try:
 		response = view(request)
 		response.render()
@@ -90,7 +207,7 @@ def process_upload_event_handler(event, context):
 	This handler is triggered by SNS whenever someone
 	publishes a message to the SNS_PROCESS_UPLOAD_EVENT_TOPIC.
 	"""
-	logger = logging.getLogger("hsreplaynet.lambdas.upload_processing")
+	logger = logging.getLogger("hsreplaynet.lambdas.process_upload_event_handler")
 
 	message = json.loads(event["Records"][0]["Sns"]["Message"])
 	logger.info("SNS message: %r", message)
