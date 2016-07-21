@@ -14,9 +14,11 @@ the rest of the hsreplaynet codebase.
 """
 import json
 import shortuuid
+import logging
 from base64 import b64decode
 from datetime import datetime
 
+logger = logging.getLogger(__name__)
 
 try:
 	import boto3
@@ -28,6 +30,7 @@ S3_RAW_LOG_UPLOAD_BUCKET = "hsreplaynet-raw-log-uploads"
 
 
 def generate_log_upload_address_handler(event, context):
+	logger.info(json.dumps(event, sort_keys=True, indent=4))
 	gateway_headers = event["headers"]
 
 	if "Authorization" not in gateway_headers:

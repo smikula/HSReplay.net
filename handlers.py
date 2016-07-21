@@ -42,3 +42,4 @@ logging.getLogger("boto").setLevel(logging.WARN)
 from hsreplaynet.lambdas.authorizer import api_gateway_authorizer as token_authorizer
 from hsreplaynet.lambdas.uploads import create_power_log_upload_event_handler
 from hsreplaynet.lambdas.uploads import process_upload_event_handler
+from hsreplaynet.lambdas.uploads import process_s3_create_handler

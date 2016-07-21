@@ -1,43 +1,38 @@
 """
-This command line tool is intended to simulate HDT uploading
-a raw log to the web server.
+This command line tool is intended to simulate HDT uploading a raw log to the web server.
 """
-import json
-import sys
+import argparse
+import os
 import requests
+import json
+from codecs import encode
 
-upload_tokens = [
-	"0adf879704bf46c1adbfaecf954079c2",
-	"e422a2b3b8e04e078e26d129dc4c20c8",
-	"cef9a4d279dd478abc230773201da0b2",
-	"363b0be8e892456580ede3ca2189de85",
-	"fb938a3b47814d54b348b1b06085f6c0",
-]
+parser = argparse.ArgumentParser(description='Upload a raw log file.')
+parser.add_argument('-m','--metadata_path', help='path to the .json file with metadata to send')
+parser.add_argument('-a', '--api_key', help='An hsreplay.net API Key')
+parser.add_argument('-t', '--auth_token', help='An hsreplay.net AuthToken')
+parser.add_argument('log_path', help="path to the power.log file to upload")
 
-API_KEY = "d1050cd9e8ed4ff7853dd109ee428505"
-UPLOAD_TOKEN = upload_tokens[4]
-HOST = "https://upload.hsreplay.net/api/v1/replay/upload/raw"
-QUERY_PARAMS = {
-	# "player_1_rank" : 18
-	# "match_start" : "2016-05-10T17:10:06.4923855+02:00"
-}
+args = parser.parse_args()
+
+HOST = "https://upload.hsreplay.net/api/v1/replay/upload/request"
+api_key = args.api_key if args.api_key else os.environ.get("HSREPLAYNET_API_KEY", None)
+auth_token = args.auth_token if args.auth_token else os.environ.get("HSREPLAYNET_AUTH_TOKEN", None)
+
 HEADERS = {
-	"x-hsreplay-api-key": API_KEY,
-	"x-hsreplay-upload-token": UPLOAD_TOKEN,
+	"X-Api-Key": api_key,
+	"Authorization": "Token %s" % auth_token,
 }
 
+metadata = open(args.metadata_path).read() if args.metadata_path else {}
+response_one = requests.post(HOST, metadata, headers=HEADERS).json()
 
-def main(path):
-	with open(path, "r") as f:
-		data = f.read()
+log = open(args.log_path).read()
+zipped_log = encode(log.encode("utf8"), "zlib")
 
-	response = requests.post(HOST, data=data, params=QUERY_PARAMS, headers=HEADERS)
-	print(response.status_code)
-	print(response.content)
-	print(response.content.decode("utf-8"))
-	result = json.loads(response.content.decode("utf-8"))
-	print(result)
+response_two = requests.put(response_one["put_url"], data=zipped_log)
 
+print("Replay ID: %s" % response_one["upload_shortid"])
 
-if __name__ == "__main__":
-	main(sys.argv[1])
+descriptor = requests.get(response_one["descriptor_url"]).json()
+print(json.dumps(descriptor, sort_keys=True, indent=4))
