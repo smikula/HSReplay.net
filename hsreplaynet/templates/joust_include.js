@@ -1,4 +1,4 @@
-{% load static from staticfiles %}
+{% load static %}
 {% load web_extras %}
 
 var joust_required = [
