@@ -42,6 +42,13 @@
 								<button class="btn btn-default" id="replay-share-copy-url" type="button" data-clipboard-target="#replay-share-url">Copy</button>
 							</span>
 						</div>
+						<fieldset>
+							<div class="checkbox">
+								<label>
+									<input type="checkbox" id="replay-share-link-turn"> Start at current turn
+								</label>
+							</div>
+						</fieldset>
 					</form>
 				</div>
 				<div class="col-lg-3 col-lg-pull-2 col-xs-12">
@@ -117,6 +124,19 @@
 <script type="text/javascript">
 	new Clipboard("#replay-share-copy-url");
 
+	var baseUrl = null;
+	var updateShareUrl = function() {
+		if(!baseUrl) {
+			baseUrl = $("#replay-share-url").val();
+		}
+		var extension = "";
+		if(joustTurn > 0 && $("#replay-share-link-turn").prop("checked")) {
+			extension = "#turn=" + Math.ceil(joustTurn / 2) + (joustTurn % 2 ? "a" : "b");
+		}
+		$("#replay-share-url").val(baseUrl + extension);
+	};
+	$("#replay-share-link-turn").change(updateShareUrl);
+
 	var joustEvents = [];
 	var joustTurn = null;
 	var j = function() {
@@ -166,6 +186,7 @@
 			{% endif %}
 			.onTurn(function(turn) {
 				joustTurn = turn;
+				updateShareUrl();
 			});
 
 		if(location.hash) {
