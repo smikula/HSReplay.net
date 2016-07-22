@@ -116,7 +116,8 @@
 			}
 		});
 		{% if dsn %}Raven && Raven.setRelease(Joust.release());{% endif %}
-		Joust.viewer("joust-container")
+
+		var launcher = Joust.viewer("joust-container")
 			.metadata(JoustExtra.metadata)
 			.assets("{% joust_static 'assets/' %}")
 			.cardArt("{% joust_static 'card-art/' %}")
@@ -124,9 +125,6 @@
 				{% if dsn %}Raven && Raven.captureException(error);{% endif %}
 				var message = error.message ? error.message : error;
 				console.error(message);
-			})
-			.onTurn(function(turn) {
-				joustTurn = turn;
 			})
 			{% if influx %}
 			.events(function(event, values, tags) {
@@ -152,7 +150,18 @@
 				});
 			})
 			{% endif %}
-			.fromUrl($("#joust-container").data("replayurl"));
+			.onTurn(function(turn) {
+				joustTurn = turn;
+			});
+
+		if(location.hash) {
+			var ret = location.hash.match(/#turn=(\d+)\.([1,2])/);
+			if(ret) {
+				launcher.turn(+(ret[1] * 2) + (+ret[2]) - 2);
+			}
+		}
+
+		launcher.fromUrl($("#joust-container").data("replayurl"));
 
 			{% if influx %}
 				var asyncInflux = true;
