@@ -3,11 +3,12 @@ Django settings for hsreplay.net project.
 """
 
 import os
+import platform
 from django.core.urlresolvers import reverse_lazy
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 IS_RUNNING_AS_LAMBDA = bool(os.environ.get("IS_RUNNING_AS_LAMBDA", ""))
-IS_RUNNING_LIVE = os.uname()[1] == "hearthsim.net"
+IS_RUNNING_LIVE = platform.node() == "hearthsim.net"
 
 ROOT_URLCONF = "hsreplaynet.urls"
 WSGI_APPLICATION = "wsgi.application"
