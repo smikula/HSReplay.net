@@ -197,17 +197,10 @@ def create_power_log_upload_event_handler(event, context):
 def create_upload_event_from_request(request):
 	logger = logging.getLogger("hsreplaynet.lambdas.create_upload_event_from_request")
 	view = UploadEventViewSet.as_view({"post": "create"})
-	try:
-		response = view(request)
-		response.render()
-		logger.info("Response (code=%r): %s" % (response.status_code, response.content))
 
-	except Exception as e:
-		logger.exception(e)
-		raise Exception(json.dumps({
-			"result_type": "SERVER_ERROR",
-			"body": str(e),
-		}))
+	response = view(request)
+	response.render()
+	logger.info("Response (code=%r): %s", response.status_code, response.content)
 
 	if response.status_code != 201:
 		logger.info("")
