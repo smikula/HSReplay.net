@@ -3,5 +3,5 @@
 # web-facing libraries (Not used for lambda clients)
 allauth_battlenet==0.9.6
 django-allauth==0.25.2
-django-loginas==0.1.9
-git+https://github.com/jleclanche/django-cloud-browser.git#egg=cloud_browser
+django-loginas==0.2.2
+git+https://github.com/jleclanche/django-cloud-browser.git#egg=django_cloud_browser
