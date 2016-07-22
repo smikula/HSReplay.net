@@ -29,11 +29,11 @@ class UnsupportedReplay(ProcessingError):
 
 
 def eligible_for_unification(meta):
-	return all([meta.get("game_id"), meta.get("client_id")])
+	return all([meta.get("game_handle"), meta.get("client_handle")])
 
 
 def find_or_create_global_game(game_tree, meta):
-	game_id = meta.get("game_id")
+	game_handle = meta.get("game_handle")
 	game_type = meta.get("game_type", 0)
 	start_time = game_tree.start_time
 	end_time = game_tree.end_time
@@ -48,7 +48,7 @@ def find_or_create_global_game(game_tree, meta):
 		matches = GlobalGame.objects.filter(
 			build=meta["build"],
 			game_type=game_type,
-			game_handle=game_id,
+			game_handle=game_handle,
 			server_address=meta.get("server_ip"),
 			server_port=meta.get("server_port"),
 			match_start__range=deduplication_time_range(start_time),
@@ -61,7 +61,7 @@ def find_or_create_global_game(game_tree, meta):
 			return matches.first(), True
 
 	global_game = GlobalGame.objects.create(
-		game_handle=game_id,
+		game_handle=game_handle,
 		server_address=meta.get("server_ip"),
 		server_port=meta.get("server_port"),
 		server_version=meta.get("server_version"),
@@ -79,7 +79,7 @@ def find_or_create_global_game(game_tree, meta):
 
 
 def find_or_create_replay(global_game, meta, unified):
-	client_handle = meta.get("client_id")
+	client_handle = meta.get("client_handle")
 	if unified:
 		# Look for duplicate uploads
 		replays = global_game.replays.filter(
