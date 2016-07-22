@@ -33,7 +33,18 @@
 		<div class="col-lg-offset-1 col-lg-10 col-xs-12">
 			{% with replay.global_game as gg %}
 			<div class="row">
-				<div class="col-lg-4 col-xs-12">
+				<div class="col-lg-2 col-lg-push-10 col-xs-12">
+					<h2>Share</h2>
+					<form>
+						<div class="input-group">
+							<input type="text" id="replay-share-url" class="form-control" value="{{ request.scheme }}://{{ request.get_host }}{{ replay.get_absolute_url }}" readonly>
+							<span class="input-group-btn">
+								<button class="btn btn-default" id="replay-share-copy-url" type="button" data-clipboard-target="#replay-share-url">Copy</button>
+							</span>
+						</div>
+					</form>
+				</div>
+				<div class="col-lg-3 col-lg-pull-2 col-xs-12">
 					<h2>Details</h2>
 					<ul>
 						<li>Patch {{ gg.build }}</li>
@@ -45,7 +56,7 @@
 						<li><a href="{{ replay.replay_xml.url }}">Download replay</a></li>
 					</ul>
 				</div>
-				<div class="col-lg-8 col-xs-12">
+				<div class="col-lg-7 col-lg-pull-2 col-xs-12">
 					<h2>Players</h2>
 					<div class="row">
 						{% for player in gg.players.all %}
@@ -102,7 +113,10 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.2.1/react-dom.min.js" integrity="sha384-1dLXeik7kFcDPXbz3rX9dibLTGh/D8dpAOL5X2Ml09pH8wpQlpL+JOgOnzAMCO4T" crossorigin="anonymous"></script>
 <script src="{% static 'web/joust-extra.js' %}"></script>
 <script src="{% joust_static 'joust.js' %}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.5.12/clipboard.min.js" integrity="sha384-zD0rXhmVlFWUQYNE6qhnghclEAj+YgdpXMO/izgNBWhg9CZTYfQx/LlgPCUfSH7V" crossorigin="anonymous"></script>
 <script type="text/javascript">
+	new Clipboard("#replay-share-copy-url");
+
 	var joustEvents = [];
 	var joustTurn = null;
 	var j = function() {
