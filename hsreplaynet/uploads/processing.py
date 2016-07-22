@@ -28,19 +28,16 @@ def queue_raw_uploads_for_processing():
 	"""
 	# Note, this method is intended to only be run in production.
 	if settings.IS_RUNNING_LIVE:
-
 		for object in aws.list_all_objects_in(settings.S3_RAW_LOG_UPLOAD_BUCKET, prefix="raw"):
-
 			key = object["Key"]
-			if key.endswith("power.log"): # Don't queue the descriptor files, just the logs.
+			if key.endswith("power.log"):  # Don't queue the descriptor files, just the logs.
 
 				message = {
 					"raw_bucket": settings.S3_RAW_LOG_UPLOAD_BUCKET,
 					"raw_key": key,
 				}
 
-				response = aws.publish_sns_message(settings.SNS_PROCESS_RAW_LOG_UPOAD_TOPIC, message)
-
+				aws.publish_sns_message(settings.SNS_PROCESS_RAW_LOG_UPOAD_TOPIC, message)
 
 
 def queue_upload_event_for_processing(upload_event_id):

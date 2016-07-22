@@ -1,25 +1,24 @@
 import json
+import shortuuid
+from datetime import datetime
 from unittest.mock import MagicMock
 from hsreplaynet.utils import aws
-from datetime import datetime
-import shortuuid
-# from hsreplaynet.lambdas.uploads import process_s3_object
 from isolated import uploaders
 
 
 def test_upload(upload_event, upload_context, monkeypatch):
 	# Control the timestamp and shortid used so we can verify the correct key generation.
+	shortid = shortuuid.uuid()
 	ts = datetime.now()
 	ts_path = ts.strftime("%Y/%m/%d/%H/%M")
+
+	def mock_get_shortid():
+		return shortid
+	monkeypatch.setattr(uploaders, "get_shortid", mock_get_shortid)
 
 	def mock_get_timestamp():
 			return ts
 	monkeypatch.setattr(uploaders, "get_timestamp", mock_get_timestamp)
-
-	shortid = shortuuid.uuid()
-	def mock_get_shortid():
-		return shortid
-	monkeypatch.setattr(uploaders, "get_shortid", mock_get_shortid)
 
 	auth_token = upload_event["headers"]["Authorization"].split()[1]
 	expected_descriptor_key = "raw/%s/%s/%s/descriptor.json" % (ts_path, auth_token, shortid)

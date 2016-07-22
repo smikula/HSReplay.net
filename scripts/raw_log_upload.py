@@ -2,17 +2,18 @@
 This command line tool is intended to simulate HDT uploading a raw log to the web server.
 """
 import argparse
+import json
 import os
 import requests
-import json
-from _datetime import datetime
+from datetime import datetime
 from codecs import encode
 
-parser = argparse.ArgumentParser(description='Upload a raw log file.')
-parser.add_argument('-m','--metadata_path', help='path to the .json file with metadata to send')
-parser.add_argument('-a', '--api_key', help='An hsreplay.net API Key')
-parser.add_argument('-t', '--auth_token', help='An hsreplay.net AuthToken')
-parser.add_argument('log_path', help="path to the power.log file to upload")
+
+parser = argparse.ArgumentParser(description="Upload a raw log file.")
+parser.add_argument("-m", "--metadata_path", help="path to the .json file with metadata to send")
+parser.add_argument("-a", "--api_key", help="An hsreplay.net API Key")
+parser.add_argument("-t", "--auth_token", help="An hsreplay.net AuthToken")
+parser.add_argument("log_path", help="path to the power.log file to upload")
 
 args = parser.parse_args()
 
@@ -22,7 +23,7 @@ auth_token = args.auth_token if args.auth_token else os.environ.get("HSREPLAYNET
 
 HEADERS = {
 	"X-Api-Key": api_key,
-	"Authorization": "Token %s" % auth_token,
+	"Authorization": "Token %s" % (auth_token),
 }
 
 if args.metadata_path:

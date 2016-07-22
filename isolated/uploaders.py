@@ -18,6 +18,7 @@ import logging
 from base64 import b64decode
 from datetime import datetime
 
+
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
@@ -39,7 +40,6 @@ def get_shortid():
 
 
 def get_auth_token(headers):
-
 	if "Authorization" not in headers:
 		raise Exception("The Authorization Header is required.")
 
@@ -60,23 +60,25 @@ def generate_log_upload_address_handler(event, context):
 	ts = get_timestamp()
 	ts_path = ts.strftime("%Y/%m/%d/%H/%M")
 
-	logger.info("Token: %s" % auth_token)
-	logger.info("ShortID: %s" % upload_shortid)
-	logger.info("Timestamp: %s" % ts_path)
+	logger.info("Token: %s", auth_token)
+	logger.info("ShortID: %s", upload_shortid)
+	logger.info("Timestamp: %s", ts_path)
 
 	upload_metadata = json.loads(b64decode(event.pop("body")).decode("utf8"))
 
-	descriptor = {"shortid": upload_shortid}
-	descriptor["upload_metadata"] = upload_metadata
-	descriptor["source_ip"] = event["source_ip"]
-	descriptor["gateway_headers"] = gateway_headers
+	descriptor = {
+		"gateway_headers": gateway_headers,
+		"shortid": upload_shortid,
+		"source_ip": event["source_ip"],
+		"upload_metadata": upload_metadata,
+	}
 
 	s3_descriptor_key = "raw/%s/%s/%s/descriptor.json" % (ts_path, auth_token, upload_shortid)
-	logger.info("S3 Descriptor Key: %s" % s3_descriptor_key)
+	logger.info("S3 Descriptor Key: %s", s3_descriptor_key)
 
 	# S3 only triggers downstream lambdas for PUTs suffixed with '...power.log'
 	s3_powerlog_key = "raw/%s/%s/%s/power.log" % (ts_path, auth_token, upload_shortid)
-	logger.info("S3 Powerlog Key: %s" % s3_powerlog_key)
+	logger.info("S3 Powerlog Key: %s", s3_powerlog_key)
 
 	descriptor["event"] = event
 	logger.info("***** COMPLETE DESCRIPTOR *****")

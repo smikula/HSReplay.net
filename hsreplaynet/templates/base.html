@@ -23,7 +23,7 @@
 		<link href="{% static 'web/my_replays.css' %}" rel="stylesheet"/>
 	{% endblock stylesheets %}
 
-	<link rel="shortcut icon" type="image/png" href="{% static  'web/images/favicon.ico' %}"/>
+	<link rel="shortcut icon" type="image/png" href="{% static 'web/images/favicon.ico' %}"/>
 	<script type="text/javascript" src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
 	<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
 	<!--[if lt IE 9]>
@@ -86,7 +86,7 @@
 	<footer class="site-footer">
 		{% block footer %}
 		<p>
-			<a href="https://hearthsim.info">HearthSim</a> &copy; {% now 'Y' %}  &middot;
+			<a href="https://hearthsim.info">HearthSim</a> &copy; {% now 'Y' %} &middot;
 			<a href="{% url 'privacy_policy' %}">Privacy Policy</a> &middot;
 			<a href="{% url 'terms_of_service' %}">Terms of Service</a>
 			{% if user.is_staff %}
