@@ -155,9 +155,9 @@
 			});
 
 		if(location.hash) {
-			var ret = location.hash.match(/#turn=(\d+)\.([1,2])/);
+			var ret = location.hash.match(/#turn=(\d+)(a|b)/);
 			if(ret) {
-				launcher.turn(+(ret[1] * 2) + (+ret[2]) - 2);
+				launcher.turn(+(ret[1] * 2) + (+(ret[2] == "b")) - 1);
 			}
 		}
 
