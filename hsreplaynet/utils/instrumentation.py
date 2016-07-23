@@ -94,12 +94,8 @@ def lambda_handler(func):
 			})
 
 		try:
-			measurement = "%s_duration_ms" % func.__name__
-			handler_start = now()
-			with influx_timer(
-				measurement, timestamp=handler_start,
-				is_running_as_lambda=settings.ENV_LAMBDA):
-
+			measurement = "%s_duration_ms" % (func.__name__)
+			with influx_timer(measurement, timestamp=now()):
 				return func(event, context)
 
 		except Exception as e:
