@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 {% load web_extras %}
+{% load render_bundle from webpack_loader %}
 
 {% block stylesheets %}
 	{{ block.super }}
@@ -260,4 +261,5 @@
 
 	$(document).ready(j);
 </script>
+{% render_bundle "replay_detail" %}
 {% endblock %}

@@ -4,4 +4,6 @@
 allauth_battlenet==0.9.6
 django-allauth==0.25.2
 django-loginas==0.2.2
+django-webpack-loader==0.3.0
 git+https://github.com/jleclanche/django-cloud-browser.git#egg=django_cloud_browser
+nodeenv==0.13.6

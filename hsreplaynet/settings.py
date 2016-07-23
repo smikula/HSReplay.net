@@ -62,6 +62,7 @@ if not ENV_LAMBDA:
 		"allauth_battlenet",
 		"loginas",
 		"cloud_browser",
+		"webpack_loader",
 	]
 
 if ENV_LIVE:
@@ -123,6 +124,13 @@ STATICFILES_DIRS = [
 	os.path.join(BASE_DIR, "hsreplaynet", "static"),
 ]
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+WEBPACK_LOADER = {
+	"DEFAULT": {
+		"BUNDLE_DIR_NAME": "bundles/",
+		"STATS_FILE": os.path.join(BASE_DIR, "webpack-stats.json"),
+    }
+}
 
 DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
 STATIC_URL = "/static/"

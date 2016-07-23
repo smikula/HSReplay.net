@@ -1,5 +1,6 @@
 from fabric.api import run, sudo
 from fabric.contrib.files import exists
+from fabric.context_managers import path
 
 
 REPO_URL = "https://github.com/HearthSim/HSReplay.net"
@@ -10,11 +11,14 @@ def deploy():
 	site_folder = "/srv/http/hsreplay.net"
 	source_folder = site_folder + "/source"
 	venv = site_folder + "/virtualenv"
+	nodeenv = site_folder + "/nodeenv"
 
 	sudo("mkdir -p %s" % (source_folder), user="www-data")
 
 	_get_latest_source(source_folder)
 	_update_virtualenv(venv, source_folder + "/requirements/live.txt")
+	_update_nodeenv(venv, nodeenv, source_folder)
+	_update_bundles(nodeenv, source_folder)
 	_update_static_files(venv, source_folder)
 	_update_database(venv, source_folder)
 
@@ -40,10 +44,23 @@ def _update_virtualenv(venv, requirements):
 	sudo(command, user="www-data")
 
 
+def _update_nodeenv(venv, nodeenv, source_path):
+	if not exists(nodeenv + "/bin/npm"):
+		sudo("%s/bin/nodeenv %s" % (venv, nodeenv), user="www-data")
+
+	with path(nodeenv + "/bin", "prepend"):
+		sudo("npm -C %s install --no-progress --production" % (source_path), user="www-data")
+
+
+def _update_bundles(nodeenv, source_path):
+	with path(nodeenv + "/bin", "prepend"):
+		sudo("npm -C %s run build" % (source_path), user="www-data")
+
+
 def _update_static_files(venv, path):
 	if not exists(path + "/hsreplaynet/static/vendor"):
 		sudo(path + "/scripts/get_vendor_static.sh", user="www-data")
-	sudo("%s/bin/python %s/manage.py collectstatic --noinput" % (venv, path), user="www-data")
+	sudo("%s/bin/python %s/manage.py collectstatic --noinput -i *.ts -i *.tsx -i typings.json" % (venv, path), user="www-data")
 
 
 def _update_database(venv, path):
