@@ -1,6 +1,7 @@
 import json
 from django.core.files.storage import default_storage
 from django.core.serializers.json import DjangoJSONEncoder
+from django.utils.six import string_types
 from rest_framework import serializers
 from hsreplaynet.games.models import GameReplay, GlobalGame, GlobalGamePlayer
 from hsreplaynet.stats import models as stats_models
@@ -19,7 +20,7 @@ class SmartFileField(serializers.FileField):
 	Also see: serializers.FilePathField
 	"""
 	def to_internal_value(self, data):
-		if isinstance(data, str):
+		if isinstance(data, string_types):
 			if default_storage.exists(data):
 				return default_storage.open(data, mode="rb")
 		return super(SmartFileField, self).to_internal_value(data)
