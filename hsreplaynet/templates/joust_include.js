@@ -11,10 +11,10 @@ var joust_required = [
 
 $(document).ready(function() {
 	$("#joust-lightbox").click(function(e) {
-		e.preventDefault();
-		$("#joust-lightbox").hide();
-	}).children().click(function(e) {
-		return false;
+		if(e.target == document.getElementById("joust-lightbox")) {
+			e.preventDefault();
+			$("#joust-lightbox").hide();
+		}
 	});
 	var joust_started = false;
 	var joust_check = function() {
