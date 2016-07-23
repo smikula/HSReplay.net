@@ -71,6 +71,7 @@ MIDDLEWARE_CLASSES = (
 	"django.middleware.clickjacking.XFrameOptionsMiddleware",
 	"django.middleware.security.SecurityMiddleware",
 	"django.middleware.gzip.GZipMiddleware",
+	"whitenoise.middleware.WhiteNoiseMiddleware",
 )
 
 TEMPLATES = [{
@@ -99,13 +100,13 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static")
 STATICFILES_DIRS = [
 	os.path.join(BASE_DIR, "hsreplaynet", "static"),
 ]
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-if DEBUG:
-	DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
-	STATIC_URL = "/static/"
-else:
+DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
+STATIC_URL = "/static/"
+
+if IS_RUNNING_LIVE or IS_RUNNING_AS_LAMBDA:
 	DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
-	STATICFILES_STORAGE = "whitenoise.django.GzipManifestStaticFilesStorage"
 	STATIC_URL = "https://static.hsreplay.net/static/"
 
 	# S3
