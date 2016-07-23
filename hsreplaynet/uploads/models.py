@@ -41,7 +41,7 @@ def _generate_upload_path(instance, filename):
 
 def _generate_upload_key(ts, shortid):
 	timestamp = ts.strftime("%Y/%m/%d/%H/%M")
-	return "uploads/%s/%s/power.log" % (timestamp, shortid)
+	return "uploads/%s/%s.power.log" % (timestamp, shortid)
 
 
 class UploadEvent(models.Model):

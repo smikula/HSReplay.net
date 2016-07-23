@@ -24,9 +24,9 @@ def error_handler(e):
 
 
 def get_token_from_key(key):
-	RAW_KEY_PATTERN = r"raw/(?P<timestamp>\d{4}/\d{2}/\d{2}/\d{2}/\d{2})/(?P<token>[a-z0-9-]{36})/(?P<shortid>\w{22})/power.log"
+	RAW_KEY_PATTERN = r"raw/(?P<timestamp>\d{4}/\d{2}/\d{2}/\d{2}/\d{2})/(?P<shortid>\w{22})\.power.log"
 	match = re.match(RAW_KEY_PATTERN, key)
-	return match.groupdict()["token"]
+	return match.groupdict()["shortid"]
 
 
 def get_tracing_id(event):

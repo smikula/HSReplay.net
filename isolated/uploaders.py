@@ -73,11 +73,11 @@ def generate_log_upload_address_handler(event, context):
 		"upload_metadata": upload_metadata,
 	}
 
-	s3_descriptor_key = "raw/%s/%s/%s/descriptor.json" % (ts_path, auth_token, upload_shortid)
+	s3_descriptor_key = "raw/%s/%s.descriptor.json" % (ts_path, upload_shortid)
 	logger.info("S3 Descriptor Key: %s", s3_descriptor_key)
 
 	# S3 only triggers downstream lambdas for PUTs suffixed with '...power.log'
-	s3_powerlog_key = "raw/%s/%s/%s/power.log" % (ts_path, auth_token, upload_shortid)
+	s3_powerlog_key = "raw/%s/%s.power.log" % (ts_path, upload_shortid)
 	logger.info("S3 Powerlog Key: %s", s3_powerlog_key)
 
 	descriptor["event"] = event

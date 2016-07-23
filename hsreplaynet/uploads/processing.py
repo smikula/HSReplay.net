@@ -53,7 +53,7 @@ def queue_upload_event_for_processing(upload_event_id):
 		else:
 			# If this was re-queued manually the tracing ID may not be set yet.
 			event = UploadEvent.objects.get(id=upload_event_id)
-			token = str(event.token.key)
+			token = str(event.shortid)
 
 		message = {
 			"id": upload_event_id,

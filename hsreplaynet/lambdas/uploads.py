@@ -60,21 +60,20 @@ def process_raw_upload(raw_bucket, raw_key):
 	it can also be invoked when a raw upload is queued for reprocessing via SNS.
 	"""
 	logger = logging.getLogger("hsreplaynet.lambdas.process_raw_upload")
-	pattern = r"raw/(?P<ts>\d{4}/\d{2}/\d{2}/\d{2}/\d{2})/(?P<token>[a-z0-9-]{36})/(?P<shortid>\w{22})/power.log"
+	pattern = r"raw/(?P<ts>\d{4}/\d{2}/\d{2}/\d{2}/\d{2})/(?P<shortid>\w{22})\.power.log"
 	match = re.match(pattern, raw_key)
 
 	if not match:
 		logger.info("ERROR: We failed to match against the S3 Key - no processing was done.")
 		return
 
-	timestamp, token, shortid = match.groups()
+	timestamp, shortid = match.groups()
 	ts = datetime.strptime(timestamp, "%Y/%m/%d/%H/%M")
 
 	logger.info("Timestamp: %s", timestamp)
-	logger.info("AuthToken: %s", token)
 	logger.info("ShortID: %s", shortid)
 
-	descriptor_key = "raw/%s/%s/%s/descriptor.json" % (timestamp, token, shortid)
+	descriptor_key = "raw/%s/%s.descriptor.json" % (timestamp, shortid)
 	logger.info("Descriptor Key: %s", descriptor_key)
 
 	obj = aws.S3.get_object(Bucket=raw_bucket, Key=descriptor_key)
