@@ -6,7 +6,6 @@ import json
 import os
 import requests
 from datetime import datetime
-from codecs import encode
 
 
 parser = argparse.ArgumentParser(description="Upload a raw log file.")
@@ -37,9 +36,8 @@ else:
 response_one = requests.post(HOST, json=metadata, headers=HEADERS).json()
 
 log = open(args.log_path).read()
-zipped_log = encode(log.encode("utf8"), "zlib")
 
-response_two = requests.put(response_one["put_url"], data=zipped_log)
+response_two = requests.put(response_one["put_url"], data=log)
 
 print("Replay ID: %s" % response_one["upload_shortid"])
 print("Put URL:\n%s" % response_one["put_url"])
