@@ -1,7 +1,7 @@
 import uuid
-from django.core.urlresolvers import reverse
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.urls import reverse
 from hsreplaynet.games.models import Visibility
 from hsreplaynet.utils.fields import IntEnumField
 

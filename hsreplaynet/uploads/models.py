@@ -1,9 +1,9 @@
 from enum import IntEnum
-from django.core.urlresolvers import reverse
+from django.core.files.storage import default_storage
 from django.db import models
 from django.dispatch.dispatcher import receiver
 from django.utils.timezone import now
-from django.core.files.storage import default_storage
+from django.urls import reverse
 from hsreplaynet.utils.fields import IntEnumField, ShortUUIDField
 
 

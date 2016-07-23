@@ -1,8 +1,8 @@
 from django import forms
 from django.contrib.admin import ACTION_CHECKBOX_NAME
-from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
+from django.urls import reverse
 from django.utils.html import format_html
 from hsreplaynet.accounts.models import User
 

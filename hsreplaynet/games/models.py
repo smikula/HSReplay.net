@@ -3,9 +3,9 @@ from math import ceil
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
-from django.core.urlresolvers import reverse
 from django.db import models
 from django.dispatch.dispatcher import receiver
+from django.urls import reverse
 from django.utils.timezone import now
 from hearthstone.enums import BnetGameType, PlayState
 from hsreplaynet.api.models import AuthToken
