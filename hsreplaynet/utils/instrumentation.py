@@ -5,6 +5,7 @@ import re
 from contextlib import contextmanager
 from functools import wraps
 from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 from django.utils.timezone import now
 from . import logger
 
@@ -119,6 +120,10 @@ def lambda_handler(func):
 try:
 	if settings.IS_RUNNING_LIVE or settings.IS_RUNNING_AS_LAMBDA:
 		from influxdb import InfluxDBClient
+
+		dbs = getattr(settings, "INFLUX_DATABASES", None)
+		if not dbs or "hsreplaynet" not in dbs:
+			raise ImproperlyConfigured("`settings.INFLUX_DATABASES` must be set")
 
 		influx_settings = settings.INFLUX_DATABASES["hsreplaynet"]
 		influx = InfluxDBClient(
