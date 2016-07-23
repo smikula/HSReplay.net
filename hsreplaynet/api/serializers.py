@@ -1,4 +1,5 @@
 import json
+from django.core.files.storage import default_storage
 from django.core.serializers.json import DjangoJSONEncoder
 from rest_framework import serializers
 from hsreplaynet.games.models import GameReplay, GlobalGame, GlobalGamePlayer
@@ -10,6 +11,18 @@ from .models import AuthToken, APIKey
 
 class DeckListField(serializers.ListField):
 	child = serializers.CharField()
+
+
+class SmartFileField(serializers.FileField):
+	"""
+	A FileField which interprets a valid string as a file path.
+	Also see: serializers.FilePathField
+	"""
+	def to_internal_value(self, data):
+		if isinstance(data, str):
+			if default_storage.exists(data):
+				return default_storage.open(data, mode="rb")
+		return super(SmartFileField, self).to_internal_value(data)
 
 
 class AccountClaimSerializer(serializers.Serializer):
@@ -108,7 +121,7 @@ class UploadEventSerializer(serializers.Serializer):
 	game = GameSerializer(read_only=True)
 	stats = SnapshotStatsSerializer(required=False)
 
-	file = serializers.FileField(write_only=True)
+	file = SmartFileField(write_only=True)
 	game_type = serializers.IntegerField(default=0, write_only=True)
 	build = serializers.IntegerField(write_only=True)
 	match_start = serializers.DateTimeField(write_only=True)

@@ -1,4 +1,18 @@
 import pytest
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
+from rest_framework.serializers import ValidationError
+from hsreplaynet.api.serializers import SmartFileField
+
+
+def test_smart_file_field():
+	field = SmartFileField()
+	with pytest.raises(ValidationError):
+		field.run_validation("does_not_exist_12e89fhcu923rks.txt")
+
+	value = default_storage.save("test_file.txt", ContentFile("test data"))
+	field.run_validation(value)
+	default_storage.delete(value)
 
 
 @pytest.mark.django_db
