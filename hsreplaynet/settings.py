@@ -22,7 +22,7 @@ if IS_RUNNING_LIVE or IS_RUNNING_AS_LAMBDA:
 else:
 	# SECURITY WARNING: don't run with debug turned on in production!
 	DEBUG = True
-	ALLOWED_HOSTS = []
+	ALLOWED_HOSTS = ["*"]
 
 
 INSTALLED_APPS = [
@@ -55,6 +55,7 @@ if not IS_RUNNING_AS_LAMBDA:
 		"loginas",
 		"cloud_browser",
 	]
+
 
 if not DEBUG:
 	INSTALLED_APPS += [
