@@ -111,7 +111,8 @@ def generate_log_upload_address_handler(event, context):
 		"put_object",
 		Params={
 			"Bucket": S3_RAW_LOG_UPLOAD_BUCKET,
-			"Key": s3_powerlog_key
+			"Key": s3_powerlog_key,
+			"ContentType": "text/plain",
 		},
 		ExpiresIn=log_put_expiration,
 		HttpMethod="PUT"

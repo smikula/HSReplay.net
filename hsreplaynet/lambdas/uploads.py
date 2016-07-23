@@ -18,7 +18,7 @@ def emulate_api_request(path, data, headers):
 	Emulates an API request from the API gateway's data.
 	"""
 	factory = APIRequestFactory()
-	request = factory.post(path, data, **headers)
+	request = factory.post(path, data, format="json", **headers)
 	SessionMiddleware().process_request(request)
 	return request
 
