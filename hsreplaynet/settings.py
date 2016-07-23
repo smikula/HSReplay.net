@@ -90,12 +90,6 @@ TEMPLATES = [{
 }]
 
 
-# Tests
-
-TEST_RUNNER = "django_nose.NoseTestSuiteRunner"
-FIXTURE_DIRS = (os.path.join(BASE_DIR, "hsreplaynet", "test", "fixtures"), )
-
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 
