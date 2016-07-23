@@ -227,3 +227,13 @@ try:
 	from hsreplaynet.local_settings import *
 except ImportError:
 	pass
+
+
+if __name__ == "__main__":
+	import json
+
+	print(json.dumps({
+		k: v for k, v in globals().items() if (
+			k.isupper() and not k.startswith("_") and not k.endswith("_URL")
+		)
+	}, sort_keys=True, indent="\t"))
