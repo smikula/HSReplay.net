@@ -89,7 +89,7 @@
 			<a href="https://hearthsim.info">HearthSim</a> &copy; {% now 'Y' %} &middot;
 			<a href="{% url 'privacy_policy' %}">Privacy Policy</a> &middot;
 			<a href="{% url 'terms_of_service' %}">Terms of Service</a>
-			{% if user.is_staff %}
+			{% if user.is_staff or debug %}
 				{% setting "RAVEN_CONFIG" as raven_config %}
 				&middot;
 				{% if raven_config.release %}
@@ -104,6 +104,11 @@
 		<p>
 			This website is not affiliated with Blizzard Entertainment.
 		</p>
+		{% if debug %}
+		<p>
+			Running in DEBUG mode.
+		</p>
+		{% endif %}
 	{% endblock %}
 	</footer>
 </body>
