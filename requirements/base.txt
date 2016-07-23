@@ -2,6 +2,8 @@ wheel==0.29.0
 Django==1.10rc1
 djangorestframework==3.4.0
 requests==2.10.0
+# Used for raise_from
+future==0.15.2
 hearthstone
 hsreplay==1.3.6
 pytz==2016.6.1
