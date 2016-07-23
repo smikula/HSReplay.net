@@ -115,7 +115,7 @@ class PlayerSerializer(serializers.Serializer):
 
 class UploadEventSerializer(serializers.Serializer):
 	id = serializers.UUIDField(read_only=True)
-	shortid = serializers.UUIDField(read_only=True)
+	shortid = serializers.CharField(required=False)
 	type = serializers.IntegerField()
 	status = serializers.IntegerField(read_only=True)
 	tainted = serializers.BooleanField(read_only=True)
@@ -155,6 +155,8 @@ class UploadEventSerializer(serializers.Serializer):
 			type=data.pop("type"),
 			upload_ip=get_client_ip(request),
 		)
+		if "shortid" in data:
+			ret.shortid = data["shortid"]
 		ret.metadata = json.dumps(data, cls=DjangoJSONEncoder)
 		ret.save()
 
