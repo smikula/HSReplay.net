@@ -117,27 +117,23 @@ def lambda_handler(func):
 	return wrapper
 
 
-try:
-	if settings.ENV_PROD:
-		from influxdb import InfluxDBClient
+if settings.INFLUX_ENABLED:
+	from influxdb import InfluxDBClient
 
-		dbs = getattr(settings, "INFLUX_DATABASES", None)
-		if not dbs or "hsreplaynet" not in dbs:
-			raise ImproperlyConfigured("`settings.INFLUX_DATABASES` must be set")
+	dbs = getattr(settings, "INFLUX_DATABASES", None)
+	if not dbs or "hsreplaynet" not in dbs:
+		raise ImproperlyConfigured('settings.INFLUX_DATABASES["hsreplaynet"] setting is not set')
 
-		influx_settings = settings.INFLUX_DATABASES["hsreplaynet"]
-		influx = InfluxDBClient(
-			host=influx_settings["HOST"],
-			port=influx_settings.get("PORT", 8086),
-			username=influx_settings["USER"],
-			password=influx_settings["PASSWORD"],
-			database=influx_settings["NAME"],
-			ssl=influx_settings.get("SSL", False),
-		)
-	else:
-		influx = None
-except ImportError as e:
-	logger.info("Influx is not installed, so will be disabled (%s)", e)
+	influx_settings = settings.INFLUX_DATABASES["hsreplaynet"]
+	influx = InfluxDBClient(
+		host=influx_settings["HOST"],
+		port=influx_settings.get("PORT", 8086),
+		username=influx_settings["USER"],
+		password=influx_settings["PASSWORD"],
+		database=influx_settings["NAME"],
+		ssl=influx_settings.get("SSL", False),
+	)
+else:
 	influx = None
 
 
@@ -152,17 +148,17 @@ def influx_write_payload(payload):
 def influx_metric(measure, fields, timestamp=None, **kwargs):
 	if influx is None:
 		return
+
 	if timestamp is None:
 		timestamp = now()
-	if settings.ENV_PROD:
-		payload = {
-			"measurement": measure,
-			"tags": kwargs,
-			"fields": fields,
-		}
 
-		payload["time"] = timestamp.isoformat()
-		influx_write_payload([payload])
+	payload = {
+		"measurement": measure,
+		"tags": kwargs,
+		"fields": fields,
+		"time": timestamp.isoformat()
+	}
+	influx_write_payload([payload])
 
 
 @contextmanager
@@ -187,13 +183,13 @@ def influx_timer(measure, timestamp=None, **kwargs):
 		tags = kwargs
 		tags["exception_thrown"] = exception_raised
 		payload = {
-			"measurement": measure,
-			"tags": tags,
 			"fields": {
 				"value": duration,
-			}
+			},
+			"measurement": measure,
+			"tags": tags,
+			"time": timestamp.isoformat(),
 		}
 
-		payload["time"] = timestamp.isoformat()
 		if influx:
 			influx_write_payload([payload])

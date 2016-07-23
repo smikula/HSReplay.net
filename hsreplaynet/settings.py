@@ -220,6 +220,8 @@ REST_FRAMEWORK = {
 # Swap when we're in public beta
 HDT_DOWNLOAD_URL = "https://hsreplay.net/pages/beta/"
 
+INFLUX_ENABLED = ENV_PROD
+
 
 try:
 	from hsreplaynet.local_settings import *
