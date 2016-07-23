@@ -1,2 +1,4 @@
 local_settings.py
 hsreplay.db
+node_modules/
+webpack-stats.json

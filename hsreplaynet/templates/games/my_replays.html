@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 {% load web_extras %}
+{% load render_bundle from webpack_loader %}
 
 {% block fullcontent %}
 <div class="content replay-listing">
@@ -57,4 +58,5 @@
 {% endif %}
 </div>
 </div>
+{% render_bundle 'my_replays' %}
 {% endblock %}
