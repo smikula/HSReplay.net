@@ -70,7 +70,7 @@ if ENV_LIVE:
 	]
 
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE_CLASSES = [
 	"django.contrib.sessions.middleware.SessionMiddleware",
 	"django.middleware.common.CommonMiddleware",
 	"django.middleware.csrf.CsrfViewMiddleware",
@@ -80,7 +80,21 @@ MIDDLEWARE_CLASSES = (
 	"django.middleware.security.SecurityMiddleware",
 	"django.middleware.gzip.GZipMiddleware",
 	"whitenoise.middleware.WhiteNoiseMiddleware",
-)
+]
+
+
+if ENV_DEV:
+	# Django Debug Toolbar
+	INSTALLED_APPS += [
+		"debug_toolbar",
+	]
+	MIDDLEWARE_CLASSES += [
+		"debug_toolbar.middleware.DebugToolbarMiddleware",
+	]
+	DEBUG_TOOLBAR_CONFIG = {
+		"JQUERY_URL": "/static/admin/js/vendor/jquery/jquery.js",
+	}
+
 
 TEMPLATES = [{
 	"BACKEND": "django.template.backends.django.DjangoTemplates",
