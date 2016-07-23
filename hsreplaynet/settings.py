@@ -6,23 +6,30 @@ import os
 import platform
 from django.core.urlresolvers import reverse_lazy
 
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-IS_RUNNING_AS_LAMBDA = bool(os.environ.get("IS_RUNNING_AS_LAMBDA", ""))
-IS_RUNNING_LIVE = platform.node() == "hearthsim.net"
 
-ROOT_URLCONF = "hsreplaynet.urls"
-WSGI_APPLICATION = "wsgi.application"
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "be8^qa&f2fut7_1%q@x2%nkw5u=-r6-rwj8c^+)5m-6e^!zags"
+ENV_LIVE = platform.node() == "hearthsim.net"
+ENV_LAMBDA = bool(os.environ.get("IS_RUNNING_AS_LAMBDA"))
+ENV_PROD = ENV_LIVE or ENV_LAMBDA
+ENV_DEV = not ENV_PROD
 
-if IS_RUNNING_LIVE or IS_RUNNING_AS_LAMBDA:
+
+if ENV_PROD:
 	DEBUG = False
 	ALLOWED_HOSTS = ["hsreplay.net", "www.hsreplay.net"]
 else:
 	# SECURITY WARNING: don't run with debug turned on in production!
 	DEBUG = True
 	ALLOWED_HOSTS = ["*"]
+
+
+ROOT_URLCONF = "hsreplaynet.urls"
+WSGI_APPLICATION = "wsgi.application"
+
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = "be8^qa&f2fut7_1%q@x2%nkw5u=-r6-rwj8c^+)5m-6e^!zags"
 
 
 INSTALLED_APPS = [
@@ -45,7 +52,7 @@ INSTALLED_APPS = [
 	"hsreplaynet.utils",
 ]
 
-if not IS_RUNNING_AS_LAMBDA:
+if not ENV_LAMBDA:
 	INSTALLED_APPS += [
 		"django.contrib.flatpages",
 		"allauth",
@@ -56,8 +63,7 @@ if not IS_RUNNING_AS_LAMBDA:
 		"cloud_browser",
 	]
 
-
-if not DEBUG:
+if ENV_LIVE:
 	INSTALLED_APPS += [
 		"raven.contrib.django.raven_compat",
 	]
@@ -106,7 +112,7 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
 STATIC_URL = "/static/"
 
-if IS_RUNNING_LIVE or IS_RUNNING_AS_LAMBDA:
+if ENV_PROD:
 	DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
 	STATIC_URL = "https://static.hsreplay.net/static/"
 
@@ -166,9 +172,6 @@ DATABASES = {
 }
 
 
-# Logging
-
-
 # Internationalization
 # https://docs.djangoproject.com/en/1.9/topics/i18n/
 
@@ -196,7 +199,7 @@ AUTHENTICATION_BACKENDS = (
 LOGIN_REDIRECT_URL = reverse_lazy("my_replays")
 LOGIN_URL = reverse_lazy("account_login")
 
-ACCOUNT_DEFAULT_HTTP_PROTOCOL = "http" if DEBUG else "https"
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = "http" if ENV_DEV else "https"
 SOCIALACCOUNT_ADAPTER = "allauth_battlenet.provider.BattleNetSocialAccountAdapter"
 SOCIALACCOUNT_PROVIDERS = {"battlenet": {"SCOPE": []}}
 

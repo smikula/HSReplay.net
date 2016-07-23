@@ -98,7 +98,7 @@ def lambda_handler(func):
 			handler_start = now()
 			with influx_timer(
 				measurement, timestamp=handler_start,
-				is_running_as_lambda=settings.IS_RUNNING_AS_LAMBDA):
+				is_running_as_lambda=settings.ENV_LAMBDA):
 
 				return func(event, context)
 
@@ -118,7 +118,7 @@ def lambda_handler(func):
 
 
 try:
-	if settings.IS_RUNNING_LIVE or settings.IS_RUNNING_AS_LAMBDA:
+	if settings.ENV_PROD:
 		from influxdb import InfluxDBClient
 
 		dbs = getattr(settings, "INFLUX_DATABASES", None)
@@ -154,7 +154,7 @@ def influx_metric(measure, fields, timestamp=None, **kwargs):
 		return
 	if timestamp is None:
 		timestamp = now()
-	if settings.IS_RUNNING_LIVE or settings.IS_RUNNING_AS_LAMBDA:
+	if settings.ENV_PROD:
 		payload = {
 			"measurement": measure,
 			"tags": kwargs,

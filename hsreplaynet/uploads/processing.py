@@ -16,7 +16,8 @@ logger = logging.getLogger(__file__)
 
 
 def queue_raw_uploads_for_processing():
-	"""Requeue all raw logs to attempt processing them into UploadEvents.
+	"""
+	Requeue all raw logs to attempt processing them into UploadEvents.
 
 	The primary use for this is for when we deploy code. The intended deploy process is:
 		- Notify S3 to suspend triggering lambda upon log upload
@@ -27,7 +28,7 @@ def queue_raw_uploads_for_processing():
 	This method can also be used to recover from a service outage.
 	"""
 	# Note, this method is intended to only be run in production.
-	if settings.IS_RUNNING_LIVE:
+	if settings.ENV_LIVE:
 		for object in aws.list_all_objects_in(settings.S3_RAW_LOG_UPLOAD_BUCKET, prefix="raw"):
 			key = object["Key"]
 			if key.endswith("power.log"):  # Don't queue the descriptor files, just the logs.
@@ -46,7 +47,7 @@ def queue_upload_event_for_processing(upload_event_id):
 	However it can also be used to requeue an UploadEvent to be
 	processed again if an error was detected downstream that has now been fixed.
 	"""
-	if settings.IS_RUNNING_LIVE or settings.IS_RUNNING_AS_LAMBDA:
+	if settings.ENV_PROD:
 		if "TRACING_REQUEST_ID" in os.environ:
 			token = os.environ["TRACING_REQUEST_ID"]
 		else:
@@ -75,7 +76,7 @@ def queue_upload_event_for_processing(upload_event_id):
 				timestamp=now(),
 				tags={
 					"success": success,
-					"is_running_as_lambda": settings.IS_RUNNING_AS_LAMBDA,
+					"is_running_as_lambda": settings.ENV_LAMBDA,
 				}
 			)
 	else:
