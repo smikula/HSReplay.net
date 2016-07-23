@@ -12,7 +12,6 @@ import os
 import django
 # This block properly bootstraps Django for running inside the AWS Lambda Runtime.
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "hsreplaynet.settings")
-os.environ.setdefault("IS_RUNNING_AS_LAMBDA", "True")
 django.setup()
 from django.conf import settings
 

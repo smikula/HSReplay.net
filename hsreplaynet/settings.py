@@ -11,7 +11,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 ENV_LIVE = platform.node() == "hearthsim.net"
-ENV_LAMBDA = bool(os.environ.get("IS_RUNNING_AS_LAMBDA"))
+ENV_LAMBDA = bool(os.environ.get("AWS_LAMBDA_FUNCTION_NAME"))
 ENV_PROD = ENV_LIVE or ENV_LAMBDA
 ENV_DEV = not ENV_PROD
 
