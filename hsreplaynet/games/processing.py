@@ -150,8 +150,7 @@ def parse_upload_event(upload_event, meta):
 	try:
 		parser = parse_log(log, processor="GameState", date=match_start)
 	except Exception as e:
-		from future.utils import raise_from
-		raise_from(ParsingError(str(e)), e)
+		raise ParsingError(str(e))  # from e
 
 	return parser
 
