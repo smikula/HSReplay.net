@@ -9,7 +9,7 @@
 	{% comment %} The following shim fixes card texture clipping in Firefox.
 	See bug: https://bugzilla.mozilla.org/show_bug.cgi?id=1075457 {% endcomment %}
 	<style type="text/css">
-		{% include "games/svg-paths-shim.css" with svg="/static/web/svg-paths.svg" %}
+		{% include "games/svg-paths-shim.css" with svg="/static/svg-paths.svg" %}
 	</style>
 {% endblock %}
 
@@ -118,7 +118,7 @@
 {% endif %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.2.1/react.min.js" integrity="sha384-ICzDcvbNpMy31akJ8WzksHoK9tl1iRIUPRCaBRN+sn/k40TNGjs9IvgPN0SekkDT" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.2.1/react-dom.min.js" integrity="sha384-1dLXeik7kFcDPXbz3rX9dibLTGh/D8dpAOL5X2Ml09pH8wpQlpL+JOgOnzAMCO4T" crossorigin="anonymous"></script>
-<script src="{% static 'web/joust-extra.js' %}"></script>
+<script src="{% static 'scripts/joust-extra.js' %}"></script>
 <script src="{% joust_static 'joust.js' %}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.5.12/clipboard.min.js" integrity="sha384-zD0rXhmVlFWUQYNE6qhnghclEAj+YgdpXMO/izgNBWhg9CZTYfQx/LlgPCUfSH7V" crossorigin="anonymous"></script>
 <script type="text/javascript">

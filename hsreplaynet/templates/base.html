@@ -19,11 +19,11 @@
 		<link href="https://fonts.googleapis.com/css?family=Noto+Sans:400,700" rel="stylesheet">
 		<link href="{% static 'bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
 		<!-- base.css should come after all Bootstrap CSS -->
-		<link href="{% static 'web/base.css' %}" rel="stylesheet"/>
-		<link href="{% static 'web/my_replays.css' %}" rel="stylesheet"/>
+		<link href="{% static 'styles/base.css' %}" rel="stylesheet"/>
+		<link href="{% static 'styles/my_replays.css' %}" rel="stylesheet"/>
 	{% endblock stylesheets %}
 
-	<link rel="shortcut icon" type="image/png" href="{% static 'web/images/favicon.ico' %}"/>
+	<link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.ico' %}"/>
 	<script type="text/javascript" src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
 	<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
 	<!--[if lt IE 9]>
@@ -35,7 +35,7 @@
 	<header>
 	{% block header %}
 		<nav>
-			<a href="/"><img src="{% static 'web/images/logo.png' %}" id="navbar-logo" alt="HSReplay"/><h1>HSReplay</h1></a>
+			<a href="/"><img src="{% static 'images/logo.png' %}" id="navbar-logo" alt="HSReplay"/><h1>HSReplay</h1></a>
 			<ul>
 			{% if user.is_authenticated %}
 				<li class="nav-replays"><a href="{% url 'my_replays' %}">My Replays</a></li>
@@ -49,13 +49,13 @@
 			{% if user.is_authenticated %}
 				<li class="dropdown">
 					<a href="{% url 'account_edit' %}">
-						<img src="{% static 'web/images/bnet.png' %}"/>
+						<img src="{% static 'images/bnet.png' %}"/>
 						<span>{{ user.username }}</span>
 					</a>
 				</li>
 			{% else %}
 				<li><a href="{% provider_login_url "battlenet" %}">
-				<img src="{% static 'web/images/bnet.png' %}"/>
+				<img src="{% static 'images/bnet.png' %}"/>
 				<span>Log In with Battle.net</span>
 				</a></li>
 			{% endif %}

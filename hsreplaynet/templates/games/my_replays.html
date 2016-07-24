@@ -13,7 +13,7 @@
 		<a href="{{ replay.get_absolute_url }}" class="hsreplay-thumbnail {{ replay.css_classes }}">
 			<div class="hsreplay-involved">
 				{% spaceless %}
-				<img src="{% static 'web/images/vs.png' %}" class="hsreplay-versus"/>
+				<img src="{% static 'images/vs.png' %}" class="hsreplay-versus"/>
 				{% for player in replay.global_game.players.all %}
 				<figure class="{% if player.won %}winner{% else %}loser{% endif %}">
 					<img src="{% setting 'JOUST_STATIC_URL' %}/card-art/{{ player.hero_id }}.jpg" alt="{{ player.hero_id }}"/>
@@ -32,9 +32,9 @@
 					<dd>{{ replay.global_game.num_own_turns }} turns</dd>
 				</dl><div>
 					{% if replay.disconnected %}
-						<img src="{% static 'web/images/dc.png' %}" class="hsreplay-type" title="Disconnected">
+						<img src="{% static 'images/dc.png' %}" class="hsreplay-type" title="Disconnected">
 					{% elif replay.global_game.is_tavern_brawl %}
-						<img src="{% static 'web/images/brawl.png' %}" class="hsreplay-type" title="Tavern Brawl">
+						<img src="{% static 'images/brawl.png' %}" class="hsreplay-type" title="Tavern Brawl">
 					{% endif %}
 					<!--<img src="assets/brm.png" class="hsreplay-type" title="Blackrock Mountain">
 					<img src="assets/loe.png" class="hsreplay-type" title="League of Explorers">

@@ -5,7 +5,7 @@
 
 {% block stylesheets %}
 	{{ block.super }}
-	<link href="{% static 'web/home.css' %}" rel="stylesheet"/>
+	<link href="{% static 'styles/home.css' %}" rel="stylesheet"/>
 {% endblock stylesheets %}
 
 {% block description %}
@@ -28,14 +28,14 @@
 <div id="home">
 	<header id="promo" class="promo">
 		<div class="container">
-			<img src="{% static 'web/images/logo.png' %}" id="logo" alt="HSReplay"/>
+			<img src="{% static 'images/logo.png' %}" id="logo" alt="HSReplay"/>
 			<h1>HSReplay</h1>
 			<p class="tagline">Share your Hearthstone games</p>
 			{% if user.is_authenticated %}
 				<p>
 					<a href="{% url 'my_replays' %}" class="promo-button">My Replays</a>
 					<a href="{% url 'account_edit' %}" class="promo-button-outline">
-						<img src="{% static 'web/images/bnet.png' %}"/>
+						<img src="{% static 'images/bnet.png' %}"/>
 						<span>{{ user.username }}</span>
 					</a>
 				</p>
@@ -44,7 +44,7 @@
 				</p>
 			{% else %}
 				<p><a href="{% provider_login_url 'battlenet' %}" class="promo-button hero-button">Sign in</a></p>
-				<p class="promo-help">You don't need a new account&mdash;we'll simply use <img src="{% static 'web/images/bnet.png' %}"/> Battle.net.</p>
+				<p class="promo-help">You don't need a new account&mdash;we'll simply use <img src="{% static 'images/bnet.png' %}"/> Battle.net.</p>
 				{% if debug %}
 					<a href="{% url 'account_login' %}">(DEBUG) Log in with password</a>
 				{% endif %}
@@ -62,8 +62,8 @@
 							Try out our super slick Hearthstone replayer:
 						</p>
 					</header>
-					<a href="{% static 'web/images/joust-screenshot.jpg' %}">
-						<img src="{% static 'web/images/joust-screenshot.jpg' %}" id="feat-joust-screenshot" alt="Joust: View your HSReplays"/>
+					<a href="{% static 'images/joust-screenshot.jpg' %}">
+						<img src="{% static 'images/joust-screenshot.jpg' %}" id="feat-joust-screenshot" alt="Joust: View your HSReplays"/>
 					</a>
 				</div>
 			</div>
@@ -75,7 +75,7 @@
 			<div class="row">
 				<div class="col-md-8 col-md-offset-2 col-xs-12 col-xs-offset-0">
 					<figure class="front-feature">
-						<img src="{% static 'web/images/front-feat-history.jpg' %}" alt="Match history" height="120" width="190" />
+						<img src="{% static 'images/front-feat-history.jpg' %}" alt="Match history" height="120" width="190" />
 						<figcaption>
 							<h2>Share your craziest moments</h2>
 							<p>
@@ -86,7 +86,7 @@
 					</figure>
 
 					<figure class="front-feature flip">
-						<img src="{% static 'web/images/front-feat-stats.jpg' %}" alt="Monthly statistics" height="120" width="190" />
+						<img src="{% static 'images/front-feat-stats.jpg' %}" alt="Monthly statistics" height="120" width="190" />
 						<figcaption>
 							<h2>Analyze your gameplay</h2>
 							<p>

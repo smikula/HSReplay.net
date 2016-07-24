@@ -6,7 +6,7 @@ var joust_required = [
 	"https://cdnjs.cloudflare.com/ajax/libs/react/15.1.0/react.min.js",
 	"https://cdnjs.cloudflare.com/ajax/libs/react/15.1.0/react-dom.min.js",
 	"{% joust_static 'joust.js' %}",
-	"{% static 'web/joust-extra.js' %}"
+	"{% static 'scripts/joust-extra.js' %}"
 ];
 
 $(document).ready(function() {
@@ -38,7 +38,7 @@ $(document).ready(function() {
 			joust_started = true;
 
 			var shim = document.createElement("style");
-			shim.innerText = "{% filter escapejs %}{% include 'games/svg-paths-shim.css' with svg='/static/web/svg-paths.svg' %}{% endfilter %}";
+			shim.innerText = "{% filter escapejs %}{% include 'games/svg-paths-shim.css' with svg='/static/svg-paths.svg' %}{% endfilter %}";
 			document.getElementsByTagName("head")[0].appendChild(shim);
 
 			JoustExtra.setup({
