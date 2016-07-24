@@ -3,8 +3,6 @@
 
 var joust_required = [
 	"{% joust_static 'joust.css' %}",
-	"{% static 'vendor/react.min.js' %}",
-	"{% static 'vendor/react-dom.min.js' %}",
 	"{% joust_static 'joust.js' %}",
 	"{% static 'scripts/joust-extra.js' %}"
 ];
