@@ -18,7 +18,7 @@ def emulate_api_request(path, data, headers):
 	Emulates an API request from the API gateway's data.
 	"""
 	factory = APIRequestFactory()
-	request = factory.post(path, data, format="json", **headers)
+	request = factory.post(path, data, **headers)
 	SessionMiddleware().process_request(request)
 	return request
 
@@ -113,6 +113,7 @@ def process_raw_upload(raw_bucket, raw_key):
 		"HTTP_X_FORWARDED_FOR": descriptor["source_ip"],
 		"HTTP_AUTHORIZATION": gateway_headers["Authorization"],
 		"HTTP_X_API_KEY": gateway_headers["X-Api-Key"],
+		"format": "json",
 	}
 
 	logger.info("***** HEADERS *****")
