@@ -3,8 +3,8 @@
 
 var joust_required = [
 	"{% joust_static 'joust.css' %}",
-	"https://cdnjs.cloudflare.com/ajax/libs/react/15.1.0/react.min.js",
-	"https://cdnjs.cloudflare.com/ajax/libs/react/15.1.0/react-dom.min.js",
+	"{% static 'vendor/react.min.js' %}",
+	"{% static 'vendor/react-dom.min.js' %}",
 	"{% joust_static 'joust.js' %}",
 	"{% static 'scripts/joust-extra.js' %}"
 ];

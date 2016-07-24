@@ -92,7 +92,7 @@ if ENV_DEV:
 		"debug_toolbar.middleware.DebugToolbarMiddleware",
 	]
 	DEBUG_TOOLBAR_CONFIG = {
-		"JQUERY_URL": "/static/admin/js/vendor/jquery/jquery.js",
+		"JQUERY_URL": "/static/vendor/jquery.js",
 	}
 
 
