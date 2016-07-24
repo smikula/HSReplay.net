@@ -2,7 +2,7 @@ from fabric.api import run, sudo
 from fabric.contrib.files import exists
 
 
-REPO_URL = "https://github.com/amw2104/hsreplaynet"
+REPO_URL = "https://github.com/HearthSim/HSReplay.net"
 NO_PIP_CACHE = True
 
 
