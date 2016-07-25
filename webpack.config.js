@@ -30,6 +30,7 @@ module.exports = {
 	externals: {
 		"react": "React",
 		"react-dom": "ReactDOM",
+		"jquery": "jQuery",
 	},
 	plugins: [
 		new BundleTracker({filename: "./webpack-stats.json"}),
