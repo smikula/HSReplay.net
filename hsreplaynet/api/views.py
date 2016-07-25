@@ -56,6 +56,11 @@ class GameReplayViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
 	serializer_class = serializers.GameReplaySerializer
 	lookup_field = "shortid"
 
+	def get_serializer_class(self):
+		if self.action == "list":
+			return serializers.GameReplayListSerializer
+		return self.serializer_class
+
 	def get_queryset(self):
 		queryset = self.queryset
 		user = self.request.user

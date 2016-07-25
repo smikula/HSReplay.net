@@ -194,3 +194,14 @@ class GameReplaySerializer(serializers.ModelSerializer):
 			"replay_xml", "build", "won", "disconnected", "reconnecting", "visibility"
 		)
 		lookup_field = "shortid"
+
+
+# Shorter serializer for list queries
+
+class GameReplayListSerializer(GameReplaySerializer):
+	class Meta:
+		model = GameReplay
+		fields = (
+			"shortid", "spectator_mode", "build", "won", "disconnected", "reconnecting",
+			"visibility", "global_game", "user"
+		)
