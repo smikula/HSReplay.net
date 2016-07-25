@@ -77,6 +77,7 @@
 </div>
 
 {% setting "JOUST_RAVEN_DSN_PUBLIC" as dsn %}
+{% setting "JOUST_RAVEN_ENVIRONMENT" as environment %}
 {% influx_db "joust" as influx %}
 {% if dsn %}<script src="{% static 'vendor/raven.min.js' %}"></script>{% endif %}
 <script type="text/javascript">
@@ -87,7 +88,11 @@
 {% if dsn %}
 	<script type="text/javascript">
 		if(Raven) {
-			Raven.config("{{ dsn }}").install();
+			Raven.config("{{ dsn }}", {
+				{% comment %} Replace this once raven-js can handle the environment key in config
+				See https://github.com/getsentry/raven-js/issues/660 {% endcomment %}
+				{% if environment %}dataCallback: function(data) { data.environment = "{{ environment }}"; }{% endif %}
+			}).install();
 			Raven.setExtraContext({
 				replay_xml_url: "{{ replay.replay_xml.url|safe }}",
 			});

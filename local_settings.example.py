@@ -22,6 +22,7 @@ RAVEN_CONFIG = {
 	# "release": raven.fetch_git_sha(os.path.join(os.path.dirname(__file__), "..")),
 }
 # JOUST_RAVEN_DSN_PUBLIC = "https://hash@app.getsentry.com/12345"
+# JOUST_RAVEN_ENVIRONMENT = "development"
 
 INFLUX_DATABASES = {
 	"hsreplaynet": {
