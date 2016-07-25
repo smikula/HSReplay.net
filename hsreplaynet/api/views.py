@@ -52,7 +52,7 @@ class UploadEventViewSet(WriteOnlyOnceViewSet):
 
 
 class GameReplayViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
-	queryset = GameReplay.objects.all()
+	queryset = GameReplay.objects.prefetch_related("user", "global_game__players")
 	serializer_class = serializers.GameReplaySerializer
 	lookup_field = "shortid"
 
@@ -64,7 +64,6 @@ class GameReplayViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
 		elif not user.is_staff:
 			queryset = queryset.filter(user=user)
 		username = self.request.query_params.get("username", None)
-		print(username)
 		if username:
 			queryset = queryset.filter(user__username=username)
 		return queryset
