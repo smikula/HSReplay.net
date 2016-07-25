@@ -120,7 +120,7 @@
 		});
 		{% if dsn %}Raven && Raven.setRelease(Joust.release());{% endif %}
 
-		var launcher = Joust.viewer("joust-container")
+		var launcher = Joust.launcher("joust-container")
 			.metadata(JoustExtra.metadata)
 			.assets("{% joust_static 'assets/' %}")
 			.cardArt("{% joust_static 'card-art/' %}")
