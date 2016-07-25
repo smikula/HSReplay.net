@@ -36,21 +36,7 @@
 			<div class="row">
 				<div class="col-lg-2 col-lg-push-10 col-xs-12">
 					<h2>Share</h2>
-					<form>
-						<div class="input-group">
-							<input type="text" id="replay-share-url" class="form-control" value="{{ request.scheme }}://{{ request.get_host }}{{ replay.get_absolute_url }}" readonly>
-							<span class="input-group-btn">
-								<button class="btn btn-default" id="replay-share-copy-url" type="button" data-clipboard-target="#replay-share-url">Copy</button>
-							</span>
-						</div>
-						<fieldset>
-							<div class="checkbox">
-								<label>
-									<input type="checkbox" id="replay-share-link-turn"> Start at current turn
-								</label>
-							</div>
-						</fieldset>
-					</form>
+					<div id="share-game-dialog" data-url="{{ request.scheme }}://{{ request.get_host }}{{ replay.get_absolute_url }}"></div>
 				</div>
 				<div class="col-lg-3 col-lg-pull-2 col-xs-12">
 					<h2>Details</h2>
@@ -119,25 +105,9 @@
 {% endif %}
 <script src="{% static 'scripts/joust-extra.js' %}"></script>
 <script src="{% joust_static 'joust.js' %}"></script>
-<script src="{% static 'vendor/clipboard.min.js' %}"></script>
 <script type="text/javascript">
-	new Clipboard("#replay-share-copy-url");
-
-	var baseUrl = null;
-	var updateShareUrl = function() {
-		if(!baseUrl) {
-			baseUrl = $("#replay-share-url").val();
-		}
-		var extension = "";
-		if(joustTurn > 0 && $("#replay-share-link-turn").prop("checked")) {
-			extension = "#turn=" + Math.ceil(joustTurn / 2) + (joustTurn % 2 ? "a" : "b");
-		}
-		$("#replay-share-url").val(baseUrl + extension);
-	};
-	$("#replay-share-link-turn").change(updateShareUrl);
-
 	var joustEvents = [];
-	var joustTurn = null;
+	var onJoustTurn = null;
 	var j = function() {
 		JoustExtra.setup({
 			hearthstonejson: "{% setting 'HEARTHSTONEJSON_URL' %}",
@@ -184,8 +154,9 @@
 			})
 			{% endif %}
 			.onTurn(function(turn) {
-				joustTurn = turn;
-				updateShareUrl();
+				if(onJoustTurn) {
+					onJoustTurn(turn);
+				}
 			});
 
 		if(location.hash) {

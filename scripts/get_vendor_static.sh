@@ -57,13 +57,3 @@ SOURCE="https://cdn.ravenjs.com/$VERSION/$PKGNAME.min.js"
 OUTFILE="$STATICDIR/$PKGNAME.min.js"
 
 wget "$SOURCE" -O "$OUTFILE"
-
-
-# Clipboard.js
-
-PKGNAME="clipboard"
-VERSION="1.5.12"
-SOURCE="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/$VERSION/$PKGNAME.min.js"
-OUTFILE="$STATICDIR/$PKGNAME.min.js"
-
-wget "$SOURCE" -O "$OUTFILE"
