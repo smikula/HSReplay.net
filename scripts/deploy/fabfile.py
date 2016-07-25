@@ -60,7 +60,7 @@ def _update_bundles(nodeenv, source_path):
 def _update_static_files(venv, path):
 	if not exists(path + "/hsreplaynet/static/vendor"):
 		sudo(path + "/scripts/get_vendor_static.sh", user="www-data")
-	sudo("%s/bin/python %s/manage.py collectstatic --noinput -i *.ts -i *.tsx -i typings.json" % (venv, path), user="www-data")
+	sudo("%s/bin/python %s/manage.py collectstatic --noinput" % (venv, path), user="www-data")
 
 
 def _update_database(venv, path):

@@ -253,6 +253,10 @@ INFLUX_ENABLED = ENV_PROD
 SCSS_INPUT_FILE = os.path.join(BASE_DIR, "hsreplaynet", "static", "styles", "main.scss")
 SCSS_OUTPUT_FILE = SCSS_INPUT_FILE.replace(".scss", ".css")
 
+# Monkeypatch default collectstatic ignore patterns
+from django.contrib.staticfiles.apps import StaticFilesConfig
+StaticFilesConfig.ignore_patterns += ["*.scss", "*.ts", "*.tsx", "typings.json"]
+
 
 try:
 	from hsreplaynet.local_settings import *
