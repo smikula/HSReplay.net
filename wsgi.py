@@ -22,11 +22,12 @@ application = DjangoWhiteNoise(application)
 if settings.DEBUG:
 	import subprocess
 
-	webpack_bin = os.path.join(settings.BASE_DIR, "node_modules/webpack/bin/webpack.js")
+	webpack_bin = os.path.join(settings.BASE_DIR, "node_modules/.bin/webpack")
 	webpack_config = os.path.join(settings.BASE_DIR, "webpack.config.js")
 	subprocess.Popen([
 		webpack_bin,
-		"-d", "--verbose", "--progress", "--colors",
+		"-d", "--devtool", "cheap-module-eval-source-map",
+		"--verbose", "--progress", "--colors",
 		"--config", webpack_config,
 		"--watch",
 	])
