@@ -60,6 +60,10 @@ def _update_bundles(nodeenv, source_path):
 def _update_static_files(venv, path):
 	if not exists(path + "/hsreplaynet/static/vendor"):
 		sudo(path + "/scripts/get_vendor_static.sh", user="www-data")
+	# XXX: Hardcoding the scss paths is nasty. This should be part of collectstatic.
+	scss_input = path + "/hsreplaynet/static/styles/main.scss"
+	scss_output = scss_input.replace(".scss", ".css")
+	sudo("%s/bin/sassc %s %s" % (venv, scss_input, scss_output), user="www-data")
 	sudo("%s/bin/python %s/manage.py collectstatic --noinput" % (venv, path), user="www-data")
 
 
