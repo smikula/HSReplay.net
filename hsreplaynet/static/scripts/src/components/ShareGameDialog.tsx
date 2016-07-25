@@ -4,10 +4,17 @@ import Clipboard from "clipboard";
 interface ShareGameDialogProps extends React.ClassAttributes<ShareGameDialog> {
 	url: string;
 	turn: number;
+	reveal?: boolean;
+	swap?: boolean;
+	alwaysLinkToTurn?: boolean;
+	showLinkToTurn?: boolean;
+	alwaysPreservePerspective?: boolean;
+	showPreservePerspective?: boolean;
 }
 
 interface ShareGameDialogState {
 	linkToTurn?: boolean;
+	preservePerspective?: boolean;
 	confirming?: boolean;
 }
 
@@ -21,6 +28,7 @@ export default class ShareGameDialog extends React.Component<ShareGameDialogProp
 		super(props, context);
 		this.state = {
 			linkToTurn: false,
+			preservePerspective: false,
 			confirming: false,
 		};
 	}
@@ -46,14 +54,30 @@ export default class ShareGameDialog extends React.Component<ShareGameDialogProp
 
 	protected buildUrl(): string {
 		let url = this.props.url;
-		if (this.props.turn && this.state.linkToTurn) {
-			url += "#turn=" + Math.ceil(this.props.turn / 2) + (this.props.turn % 2 ? "a" : "b");
+		let parts = [];
+		if (this.props.turn && ((this.props.showLinkToTurn && this.state.linkToTurn) || this.props.alwaysLinkToTurn)) {
+			parts.push("turn=" + Math.ceil(this.props.turn / 2) + (this.props.turn % 2 ? "a" : "b"));
+		}
+		if ((this.props.showPreservePerspective && this.state.preservePerspective) || this.props.alwaysPreservePerspective) {
+			if(typeof this.props.reveal == "boolean" || this.props.reveal) {
+				parts.push("reveal=" + (this.props.reveal ? 1 : 0));
+			}
+			if(typeof this.props.swap == "boolean" || this.props.swap) {
+				parts.push("swap=" + (this.props.swap ? 1 : 0));
+			}
+		}
+		if (parts.length) {
+			url += "#" + parts.join("&");
 		}
 		return url;
 	}
 
-	protected onChangeLinkToTurn(e): void {
+	protected onChangeLinkToTurn(): void {
 		this.setState({linkToTurn: !this.state.linkToTurn});
+	}
+
+	protected onChangePreservePerspective(): void {
+		this.setState({preservePerspective: !this.state.preservePerspective});
 	}
 
 	render(): JSX.Element {
@@ -69,12 +93,18 @@ export default class ShareGameDialog extends React.Component<ShareGameDialogProp
                 </span>
 			</div>
 			<fieldset>
-				<div className="checkbox">
+				{this.props.showLinkToTurn ? <div className="checkbox">
 					<label>
 						<input type="checkbox" id="replay-share-link-turn" checked={this.state.linkToTurn}
-							   onChange={(e) => this.onChangeLinkToTurn(e)}/> Start at current turn
+							   onChange={(e) => this.onChangeLinkToTurn()}/> Start at current turn
 					</label>
-				</div>
+				</div> : null}
+				{this.props.showPreservePerspective ? <div className="checkbox">
+					<label>
+						<input type="checkbox" id="replay-share-link-turn" checked={this.state.preservePerspective}
+							   onChange={(e) => this.onChangePreservePerspective()}/> Preserve perspective
+					</label>
+				</div> : null}
 			</fieldset>
 		</form>;
 	}
