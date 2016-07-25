@@ -31,3 +31,10 @@ if settings.DEBUG:
 		"--config", webpack_config,
 		"--watch",
 	])
+
+	sassc = os.path.join(settings.BASE_DIR)
+	subprocess.Popen([
+		"sassc", settings.SCSS_INPUT_FILE, settings.SCSS_OUTPUT_FILE,
+		"--sourcemap", "--source-comments",
+		"--watch",
+	])

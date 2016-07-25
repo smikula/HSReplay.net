@@ -249,6 +249,10 @@ HDT_DOWNLOAD_URL = "https://hsreplay.net/pages/beta/"
 
 INFLUX_ENABLED = ENV_PROD
 
+# Used for compiling SCSS
+SCSS_INPUT_FILE = os.path.join(BASE_DIR, "hsreplaynet", "static", "styles", "main.scss")
+SCSS_OUTPUT_FILE = SCSS_INPUT_FILE.replace(".scss", ".css")
+
 
 try:
 	from hsreplaynet.local_settings import *

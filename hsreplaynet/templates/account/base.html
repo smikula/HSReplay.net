@@ -1,11 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block stylesheets %}
-	{{ block.super }}
-	<link href="{% static 'styles/account.css' %}" rel="stylesheet"/>
-{% endblock stylesheets %}
-
 {% block fullcontent %}
 	{% if user.is_authenticated %}
 		<nav class="navbar navbar-default">
