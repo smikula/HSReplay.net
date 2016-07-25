@@ -11,9 +11,9 @@ insert_final_newline = true
 tab_width = 4
 trim_trailing_whitespace = true
 
-[*.{js,py,ts}]
+[*.{js,py,ts,tsx}]
 spaces_around_brackets = none
 spaces_around_operators = true
 
-[*.{css,js,ts}]
+[*.{css,js,ts,tsx}]
 indent_brace_style = BSD KNF
