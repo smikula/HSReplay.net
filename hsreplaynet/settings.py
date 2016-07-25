@@ -8,6 +8,9 @@ from django.urls import reverse_lazy
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BUILD_DIR = os.path.join(BASE_DIR, "build")
+if not os.path.exists(BUILD_DIR):
+	os.mkdir(BUILD_DIR)
 
 
 ENV_LIVE = platform.node() == "hearthsim.net"
@@ -117,7 +120,7 @@ TEMPLATES = [{
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 
-MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+MEDIA_ROOT = os.path.join(BUILD_DIR, "media")
 MEDIA_URL = "/media/"
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
 STATICFILES_DIRS = [
@@ -128,8 +131,8 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 WEBPACK_LOADER = {
 	"DEFAULT": {
 		"BUNDLE_DIR_NAME": "bundles/",
-		"STATS_FILE": os.path.join(BASE_DIR, "webpack-stats.json"),
-    }
+		"STATS_FILE": os.path.join(BUILD_DIR, "webpack-stats.json"),
+	}
 }
 
 DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
@@ -186,7 +189,7 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 DATABASES = {
 	"default": {
 		"ENGINE": "django.db.backends.sqlite3",
-		"NAME": os.path.join(BASE_DIR, "db.sqlite"),
+		"NAME": os.path.join(BUILD_DIR, "db.sqlite"),
 		"USER": "",
 		"PASSWORD": "",
 		"HOST": "",

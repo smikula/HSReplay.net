@@ -33,6 +33,6 @@ module.exports = {
 		"jquery": "jQuery",
 	},
 	plugins: [
-		new BundleTracker({filename: "./webpack-stats.json"}),
+		new BundleTracker({filename: "./build/webpack-stats.json"}),
 	],
 };
