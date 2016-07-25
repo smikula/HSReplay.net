@@ -83,7 +83,6 @@ MIDDLEWARE_CLASSES = [
 	"django.middleware.clickjacking.XFrameOptionsMiddleware",
 	"django.middleware.security.SecurityMiddleware",
 	"django.middleware.gzip.GZipMiddleware",
-	"whitenoise.middleware.WhiteNoiseMiddleware",
 ]
 
 
@@ -126,7 +125,6 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static")
 STATICFILES_DIRS = [
 	os.path.join(BASE_DIR, "hsreplaynet", "static"),
 ]
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 WEBPACK_LOADER = {
 	"DEFAULT": {

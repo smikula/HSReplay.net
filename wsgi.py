@@ -11,11 +11,9 @@ import os; os.environ.setdefault("DJANGO_SETTINGS_MODULE", "hsreplaynet.settings
 import sys; sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 from django.conf import settings
 from django.core.wsgi import get_wsgi_application
-from whitenoise.django import DjangoWhiteNoise
 
 
 application = get_wsgi_application()
-application = DjangoWhiteNoise(application)
 
 
 # Run webpack in the background if we are in DEBUG mode
