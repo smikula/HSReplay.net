@@ -64,7 +64,7 @@ if not ENV_LAMBDA:
 		"allauth",
 		"allauth.account",
 		"allauth.socialaccount",
-		"allauth_battlenet",
+		"allauth.socialaccount.providers.battlenet",
 		"loginas",
 		"cloud_browser",
 		"webpack_loader",
@@ -226,7 +226,7 @@ LOGIN_REDIRECT_URL = reverse_lazy("my_replays")
 LOGIN_URL = reverse_lazy("account_login")
 
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = "http" if ENV_DEV else "https"
-SOCIALACCOUNT_ADAPTER = "allauth_battlenet.provider.BattleNetSocialAccountAdapter"
+SOCIALACCOUNT_ADAPTER = "allauth.socialaccount.providers.battlenet.provider.BattleNetSocialAccountAdapter"
 SOCIALACCOUNT_PROVIDERS = {"battlenet": {"SCOPE": []}}
 
 

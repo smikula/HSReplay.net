@@ -14,7 +14,6 @@ urlpatterns = [
 	url(r"^api/", include("hsreplaynet.api.urls")),
 	url(r"^about/privacy/$", flatpage, {"url": "/about/privacy/"}, name="privacy_policy"),
 	url(r"^about/tos/$", flatpage, {"url": "/about/tos/"}, name="terms_of_service"),
-	url(r"^account/", include("allauth_battlenet.urls")),
 	url(r"^account/", include("allauth.urls")),
 	url(r"^account/", include("hsreplaynet.accounts.urls")),
 	url(r"^games/", include("hsreplaynet.games.urls")),
