@@ -2,8 +2,6 @@
 
 {% block content %}
 
-	<p><strong>This page is not functional yet.</strong></p>
-
 	<h1>Leaving so soon?</h1>
 
 	<p>
@@ -13,20 +11,23 @@
 
 	<p>
 		Once your data is gone, it's irreversible. Are you sure?
-	<form action="#" method="Post">
-		<div class="checkbox">
-			<label>
-				<input type="checkbox" required disabled/> <strong>I understand. Delete my account.</strong>
-			</label>
-		</div>
-		<div class="checkbox">
-			<label>
-				<input type="checkbox" disabled/> Also delete my replay data
-			</label>
-		</div>
-		<div class="form-group">
-			<input type="submit" value="Confirm" disabled/>
-		</div>
-	</form>
+		<form action="" method="POST" onsubmit="confirm('Are you *really* sure?')">
+			{% csrf_token %}
+			<div class="checkbox">
+				<label>
+					<input name="delete_confirm" type="checkbox" required="required"/>
+					<strong>I understand. Delete my account.</strong>
+				</label>
+			</div>
+			<div class="checkbox">
+				<label>
+					<input name="delete_replays" type="checkbox"/>
+					Also delete my replay data
+				</label>
+			</div>
+			<div class="form-group">
+				<input type="submit" value="Confirm"/>
+			</div>
+		</form>
 	</p>
 {% endblock %}
