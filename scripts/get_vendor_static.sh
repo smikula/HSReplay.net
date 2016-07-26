@@ -11,7 +11,7 @@ mkdir -p "$STATICDIR"
 
 # Bootstrap
 
-VERSION="3.3.6"
+VERSION="3.3.7"
 PKGNAME="bootstrap-$VERSION-dist"
 SOURCE="https://github.com/twbs/bootstrap/releases/download/v$VERSION/$PKGNAME.zip"
 OUTDIR="$STATICDIR/bootstrap"
