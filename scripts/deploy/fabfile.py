@@ -19,6 +19,7 @@ def deploy():
 	_update_virtualenv(venv, source_folder + "/requirements/live.txt")
 	_update_nodeenv(venv, nodeenv, source_folder)
 	_update_bundles(nodeenv, source_folder)
+	_compile_error_pages(venv, source_folder)
 	_update_static_files(venv, source_folder)
 	_update_database(venv, source_folder)
 
@@ -55,6 +56,10 @@ def _update_nodeenv(venv, nodeenv, source_path):
 def _update_bundles(nodeenv, source_path):
 	with path(nodeenv + "/bin", "prepend"):
 		sudo("npm -C %s run build" % (source_path), user="www-data")
+
+
+def _compile_error_pages(venv, path):
+	sudo("%s/bin/python %s/manage.py compile_error_pages" % (venv, path), user="www-data")
 
 
 def _update_static_files(venv, path):
