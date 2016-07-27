@@ -1,6 +1,6 @@
 from rest_framework.authentication import SessionAuthentication
-from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveModelMixin
-from rest_framework.generics import CreateAPIView
+from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin
+from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveDestroyAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
@@ -51,23 +51,28 @@ class UploadEventViewSet(WriteOnlyOnceViewSet):
 	serializer_class = serializers.UploadEventSerializer
 
 
-class GameReplayViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
-	queryset = GameReplay.objects.prefetch_related("user", "global_game__players")
+class GameReplayDetail(RetrieveDestroyAPIView):
+	queryset = GameReplay.objects.all()
 	serializer_class = serializers.GameReplaySerializer
 	lookup_field = "shortid"
 
-	def get_serializer_class(self):
-		if self.action == "list":
-			return serializers.GameReplayListSerializer
-		return self.serializer_class
+
+class GameReplayList(ListAPIView):
+	queryset = GameReplay.objects.prefetch_related("user", "global_game__players")
+	serializer_class = serializers.GameReplayListSerializer
+
+	def check_permissions(self, request):
+		if not request.user.is_authenticated:
+			self.permission_denied(request)
+		return super().check_permissions(request)
 
 	def get_queryset(self):
-		queryset = self.queryset
+		queryset = super().get_queryset()
 		user = self.request.user
-		if user.is_anonymous:
-			queryset = queryset.none()
-		elif not user.is_staff:
+		if not user.is_staff:
+			# For non-staff, only own games are visible
 			queryset = queryset.filter(user=user)
+		# Allow filtering on username key
 		username = self.request.query_params.get("username", None)
 		if username:
 			queryset = queryset.filter(user__username=username)
