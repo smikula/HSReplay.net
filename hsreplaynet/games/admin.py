@@ -16,7 +16,7 @@ queue_for_reprocessing.short_description = "Queue original upload for reprocessi
 
 class GlobalGamePlayerInline(admin.StackedInline):
 	model = GlobalGamePlayer
-	raw_id_fields = ("user", "deck_list")
+	raw_id_fields = ("user", "hero", "deck_list")
 	max_num = 2
 	show_change_link = True
 
@@ -49,7 +49,7 @@ class GameReplayAdmin(admin.ModelAdmin):
 	)
 	list_filter = (
 		"global_game__game_type", "hsreplay_version", "visibility",
-		"won", "spectator_mode", "disconnected", "reconnecting",
+		"won", "spectator_mode", "disconnected", "reconnecting", "is_deleted"
 	)
 	raw_id_fields = (
 		"upload_token", "user", "global_game",
