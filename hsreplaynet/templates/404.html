@@ -1,0 +1,50 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>Not found :(</title>
+<style type="text/css">
+* {
+	margin: 0;
+	padding: 0;
+}
+
+html {
+	background: #1d3657;
+	color: white;
+	padding: 15px;
+}
+
+img {
+	transform: rotate(90deg);
+}
+
+body {
+	text-align: center;
+	margin: 7% auto 0;
+	max-width: 390px;
+	min-height: 180px;
+	padding: 30px 0 15px;
+}
+
+a {
+	color: #c9485b;
+}
+
+p {
+	margin: 2em;
+}
+</style>
+</head>
+<body>
+	<a href="{% url 'home' %}"><img src="{% static 'images/logo.png' %}" alt="HSReplay.net"></a>
+	<h4>404.</h4>
+	<p>
+		That's a lot more than 200.
+	</p>
+	<p>
+		<a href="{% url 'home' %}">Back to the office.</a>
+	</p>
+</body>
+</html>
