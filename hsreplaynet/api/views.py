@@ -52,13 +52,17 @@ class UploadEventViewSet(WriteOnlyOnceViewSet):
 
 
 class GameReplayDetail(RetrieveDestroyAPIView):
-	queryset = GameReplay.objects.all()
+	queryset = GameReplay.objects.live()
 	serializer_class = serializers.GameReplaySerializer
 	lookup_field = "shortid"
 
+	def perform_destroy(self, instance):
+		instance.is_deleted = True
+		instance.save()
+
 
 class GameReplayList(ListAPIView):
-	queryset = GameReplay.objects.prefetch_related("user", "global_game__players")
+	queryset = GameReplay.objects.live().prefetch_related("user", "global_game__players")
 	serializer_class = serializers.GameReplayListSerializer
 
 	def check_permissions(self, request):

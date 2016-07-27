@@ -194,6 +194,11 @@ class Visibility(IntEnum):
 	Unlisted = 2
 
 
+class GameReplayManager(models.Manager):
+	def live(self):
+		return self.filter(is_deleted=False)
+
+
 class GameReplay(models.Model):
 	"""
 	Represents a replay as captured from the point of view of a single
@@ -278,6 +283,8 @@ class GameReplay(models.Model):
 
 	visibility = IntEnumField(enum=Visibility, default=Visibility.Public)
 	hide_player_names = models.BooleanField(default=False)
+
+	objects = GameReplayManager()
 
 	def __str__(self):
 		return str(self.global_game)
