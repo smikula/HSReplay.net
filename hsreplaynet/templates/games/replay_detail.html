@@ -34,11 +34,11 @@
 		<div class="col-lg-offset-1 col-lg-10 col-xs-12">
 			{% with replay.global_game as gg %}
 			<div class="row">
-				<div class="col-lg-2 col-lg-push-10 col-xs-12">
+				<div class="col-lg-3 col-lg-push-9 col-xs-12">
 					<h2>Share</h2>
 					<div id="share-game-dialog" data-url="{{ request.scheme }}://{{ request.get_host }}{{ replay.get_absolute_url }}"></div>
 				</div>
-				<div class="col-lg-3 col-lg-pull-2 col-xs-12">
+				<div class="col-lg-3 col-lg-pull-3 col-xs-12">
 					<h2>Details</h2>
 					<ul>
 						<li>Patch {{ gg.build }}</li>
@@ -50,7 +50,7 @@
 						<li><a href="{{ replay.replay_xml.url }}">Download replay</a></li>
 					</ul>
 				</div>
-				<div class="col-lg-7 col-lg-pull-2 col-xs-12">
+				<div class="col-lg-6 col-lg-pull-3 col-xs-12">
 					<h2>Players</h2>
 					<div class="row">
 						{% for player in gg.players.all %}
