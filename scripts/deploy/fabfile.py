@@ -58,8 +58,11 @@ def _update_bundles(nodeenv, source_path):
 		sudo("npm -C %s run build" % (source_path), user="www-data")
 
 
-def _compile_error_pages(venv, path):
-	sudo("%s/bin/python %s/manage.py compile_error_pages" % (venv, path), user="www-data")
+def _compile_error_pages(venv, path, strip_whitespace=True):
+	command = "%s/bin/python %s/manage.py compile_error_pages" % (venv, path)
+	if strip_whitespace:
+		command += " --strip-whitespace"
+	sudo(command, user="www-data")
 
 
 def _update_static_files(venv, path):

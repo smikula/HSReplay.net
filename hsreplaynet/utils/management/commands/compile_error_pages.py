@@ -22,12 +22,16 @@ class Command(BaseCommand):
 	def add_arguments(self, parser):
 		parser.add_argument("--template", default="error.html")
 		parser.add_argument("--outdir", default=settings.TEMPLATES[0]["DIRS"][0])
+		parser.add_argument("--strip-whitespace", action="store_true")
 
 	def handle(self, *args, **options):
 		for error_code, context in ERRORS.items():
 			filename = "%i.html" % (error_code)
 			context["error_code"] = error_code
 			out = render_to_string(options["template"], context)
+
+			if options["strip_whitespace"]:
+				out = out.replace("\t", "").replace("\n", "")
 
 			path = os.path.join(options["outdir"], filename)
 			self.stdout.write("Compiling %r" % (path))
