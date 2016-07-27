@@ -23,3 +23,17 @@ class APIKeyPermission(permissions.BasePermission):
 
 		request.api_key = api_key
 		return api_key.enabled
+
+
+class IsOwnerOrReadOnly(permissions.BasePermission):
+	"""
+	Permission check that fails on unsafe methods, unless the
+	user owns that object.
+	"""
+
+	OWNER_FIELD = "user"
+
+	def has_object_permission(self, request, view, obj):
+		if request.method in permissions.SAFE_METHODS:
+			return True
+		return getattr(obj, self.OWNER_FIELD) == request.user

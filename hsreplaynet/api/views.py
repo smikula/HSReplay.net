@@ -11,7 +11,7 @@ from hsreplaynet.uploads.models import UploadEvent
 from . import serializers
 from .authentication import AuthTokenAuthentication, RequireAuthToken
 from .models import AuthToken, APIKey
-from .permissions import APIKeyPermission
+from .permissions import APIKeyPermission, IsOwnerOrReadOnly
 
 
 class WriteOnlyOnceViewSet(CreateModelMixin, RetrieveModelMixin, GenericViewSet):
@@ -55,6 +55,7 @@ class GameReplayDetail(RetrieveDestroyAPIView):
 	queryset = GameReplay.objects.live()
 	serializer_class = serializers.GameReplaySerializer
 	lookup_field = "shortid"
+	permission_classes = (IsOwnerOrReadOnly, )
 
 	def perform_destroy(self, instance):
 		instance.is_deleted = True
