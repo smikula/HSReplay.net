@@ -4,7 +4,10 @@
 {% block content %}
 
 <p class="upload-status-message upload-{{ upload.status.name|lower }}">
-{% if upload.is_processing %}
+{% if not upload %}
+	Your replay is still uploading. Hold on!<br/>
+	<em style="font-size: 0.5em;">Hmm. Or maybe something went wrong...</em>
+{% elif upload.is_processing %}
 	Your replay is still processing. Check back soon!
 {% elif upload.status.name == "UNSUPPORTED" %}
 	<strong>This replay is not supported.</strong><br/>
