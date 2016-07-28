@@ -5,51 +5,8 @@
 
 {% block fullcontent %}
 <div class="content replay-listing">
-<div class="container-fluid">
-{% if replays %}
-<div class="row">
-	{% for replay in replays %}
-	<div class="col-xs-12 col-sm-6 col-md-4 col-lg-3">
-		<!-- hsreplay-negative, hsreplay-positive, hsreplay-invalid -->
-		<a href="{{ replay.get_absolute_url }}" class="hsreplay-thumbnail {{ replay.css_classes }}">
-			<div class="hsreplay-involved">
-				{% spaceless %}
-				<img src="{% static 'images/vs.png' %}" class="hsreplay-versus"/>
-				{% for player in replay.global_game.players.all %}
-				<figure class="{% if player.won %}winner{% else %}loser{% endif %}">
-					<img src="{% setting 'JOUST_STATIC_URL' %}/card-art/{{ player.hero_id }}.jpg" alt="{{ player.hero_id }}"/>
-					<figcaption>{{ player.name }}</figcaption>
-				</figure>
-				{% endfor %}
-				{% endspaceless %}
-			</div>
-			<div class="hsreplay-details">
-				<dl>
-					<dt>Played</dt>
-					<dd title="{{ replay.global_game.match_start }}">{{ replay.global_game.match_start|human_time }}</dd>
-					<dt>Duration</dt>
-					<dd>{{ replay.global_game.duration|human_duration }}</dd>
-					<dt>Turns</dt>
-					<dd>{{ replay.global_game.num_own_turns }} turns</dd>
-				</dl><div>
-					{% if replay.disconnected %}
-						<img src="{% static 'images/dc.png' %}" class="hsreplay-type" title="Disconnected">
-					{% elif replay.global_game.is_tavern_brawl %}
-						<img src="{% static 'images/brawl.png' %}" class="hsreplay-type" title="Tavern Brawl">
-					{% endif %}
-					<!--<img src="assets/brm.png" class="hsreplay-type" title="Blackrock Mountain">
-					<img src="assets/loe.png" class="hsreplay-type" title="League of Explorers">
-					<img src="assets/rank14.png" class="hsreplay-type" title="Rank 14">
-					<img src="assets/arena8.png" class="hsreplay-type" title="Arena">
-					<img src="assets/naxx.png" class="hsreplay-type" title="Curse of Naxxramas">
-					-->
-				</div>
-			</div>
-		</a>
-	</div>
-	{% endfor %}
-</div>
-{% else %}
+<div class="container-fluid" id="my-games-container">
+{% if not replays %}
 	<section id="my-games-empty">
 		<h1>Play a few games!</h1>
 		<p>Your replays will appear here once you've uploaded them using Hearthstone Deck Tracker.</p>
