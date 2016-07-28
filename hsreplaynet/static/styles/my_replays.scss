@@ -2,40 +2,35 @@
 	margin: 1em auto;
 }
 
-.hsreplay-thumbnail {
-	display: block;
-	padding: 4px;
-	margin-bottom: 20px;
-	line-height: 1.42857143;
-	background-color: #fff;
-	border: 1px solid #ddd;
-	border-radius: 4px;
-	-webkit-transition: border .2s ease-in-out;
-	transition: border .2s ease-in-out;
+.game-history-item {
+	&>a {
+		border: 2px solid #bbbbbb;
+		background-color: rgb(247, 247, 247);
+		border-radius: 4px;
+		color: inherit;
+		display: block;
+		line-height: 1.42857143;
+		margin-bottom: 20px;
+		padding: 4px;
+
+		&.won {
+			border-color: #8ce62c;
+			background-color: rgb(240, 245, 233);
+		}
+
+		&.lost {
+			border-color: #e64032;
+			background-color: rgb(245, 236, 233);
+		}
+	}
 }
 
+
 .hsreplay-thumbnail {
-	border: solid 2px black;
-	color: inherit;
 }
 
 a.hsreplay-thumbnail:link, a.hsreplay-thumbnail:hover {
 	color: inherit;
-}
-
-.hsreplay-thumbnail.hsreplay-positive {
-	border-color: #8ce62c;
-	background-color: rgb(240, 245, 233);
-}
-
-.hsreplay-thumbnail.hsreplay-negative {
-	border-color: #e64032;
-	background-color: rgb(245, 236, 233);
-}
-
-.hsreplay-thumbnail.hsreplay-invalid {
-	border-color: #bbbbbb;
-	background-color: rgb(247, 247, 247);
 }
 
 /* Top section (.hsreplay-involved) */

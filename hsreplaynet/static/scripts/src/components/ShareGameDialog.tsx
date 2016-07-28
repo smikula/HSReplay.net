@@ -1,6 +1,7 @@
 import * as React from "react";
 import Clipboard from "clipboard";
 
+
 interface ShareGameDialogProps extends React.ClassAttributes<ShareGameDialog> {
 	url: string;
 	turn: number;
