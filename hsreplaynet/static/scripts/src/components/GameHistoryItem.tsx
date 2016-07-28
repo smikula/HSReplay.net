@@ -1,32 +1,12 @@
 import * as React from "react";
-
-
-interface GameHistoryPlayerProps extends React.ClassAttributes<GameHistoryItem> {
-	name: string;
-	heroId: string;
-	won: boolean;
-}
-
-interface GameHistoryPlayerState {}
-
-
-export class GameHistoryPlayer extends React.Component<GameHistoryPlayerProps, GameHistoryPlayerState> {
-	constructor(props: GameHistoryPlayerProps, context: any) {
-		super(props, context);
-	}
-
-	render(): JSX.Element {
-		return (<figure className={this.props.won ? "winner" : "loser"}>
-			<img src={"https://static.hsreplay.net/static/joust/card-art/" + this.props.heroId + ".jpg"}/>
-			<figcaption>{this.props.name}</figcaption>
-		</figure>);
-	}
-}
+import {GlobalGamePlayer} from "../interfaces";
+import GameHistoryPlayer from "./GameHistoryPlayer";
+import {PlayState} from "../hearthstone";
 
 
 interface GameHistoryItemProps extends React.ClassAttributes<GameHistoryItem> {
 	shortid: string;
-	players: Array<Object>;
+	players: GlobalGamePlayer[];
 	startTime: Date;
 	endTime: Date;
 	gameType: number;
@@ -51,7 +31,7 @@ function humanTime(seconds) {
 	return mins + " minutes";
 }
 
-export class GameHistoryItem extends React.Component<GameHistoryItemProps, GameHistoryItemState> {
+export default class GameHistoryItem extends React.Component<GameHistoryItemProps, GameHistoryItemState> {
 	constructor(props: GameHistoryItemProps, context: any) {
 		super(props, context);
 	}
@@ -84,7 +64,7 @@ export class GameHistoryItem extends React.Component<GameHistoryItemProps, GameH
 				<div className="hsreplay-involved">
 					<img src="/static/images/vs.png" className="hsreplay-versus"/>
 					{this.props.players.map(function(player, i) {
-						return <GameHistoryPlayer name={player["name"]} heroId={player["hero_id"]} won={player["final_state"] == 4}/>;
+						return <GameHistoryPlayer name={player.name} heroId={player.hero_id} won={player.final_state == PlayState.WON}/>;
 					})}
 				</div>
 				<div className="hsreplay-details">
@@ -101,40 +81,5 @@ export class GameHistoryItem extends React.Component<GameHistoryItemProps, GameH
 				</div>
 			</a>
 		</div>);
-	}
-}
-
-
-interface GameHistoryListProps extends React.ClassAttributes<GameHistoryList> {
-	games: Array<Object>;
-}
-
-interface GameHistoryListState {}
-
-export default class GameHistoryList extends React.Component<GameHistoryListProps, GameHistoryListState> {
-
-	constructor(props: GameHistoryListProps, context: any) {
-		super(props, context);
-	}
-
-	render(): JSX.Element {
-		return <div class="row">
-			{this.props.games.map(
-				function(game, i) {
-					var startTime: Date = new Date(game["global_game"].match_start);
-					var endTime: Date = new Date(game["global_game"].match_end);
-					return <GameHistoryItem
-						shortid={game["shortid"]}
-						players={game["global_game"].players}
-						startTime={startTime}
-						endTime={endTime}
-						gameType={game["global_game"].game_type}
-						disconnected={game["disconnected"]}
-						turns={game["global_game"].num_turns}
-						won={game["won"]}
-					/>;
-				}
-			)}
-		</div>;
 	}
 }
