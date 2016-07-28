@@ -3,7 +3,7 @@
 	"private": true,
 	"scripts": {
 		"install": "typings install --production",
-		"build": "webpack --optimize-minimize"
+		"build": "webpack --optimize-minimize --bail"
 	},
 	"dependencies": {
 		"awesome-typescript-loader": "^2.1.0",
