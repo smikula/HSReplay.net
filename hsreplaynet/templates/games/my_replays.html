@@ -50,11 +50,20 @@
 	{% endfor %}
 </div>
 {% else %}
-	<div class="text-center">
+	<section id="my-games-empty">
 		<h1>Play a few games!</h1>
 		<p>Your replays will appear here once you've uploaded them using Hearthstone Deck Tracker.</p>
 		<p><a href="{% setting 'HDT_DOWNLOAD_URL' %}" class="promo-button">Download HDT</a></p>
-	</div>
+
+		<hr/>
+
+		<p id="my-games-claim-account">
+			Make sure to claim your account from HDT in <code>Options → Replays</code>.
+			<a href="{% static 'images/claim-account.jpg' %}">
+				<img src="{% static 'images/claim-account.png' %}"/>
+			</a>
+		</p>
+	</section>
 {% endif %}
 </div>
 </div>

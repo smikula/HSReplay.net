@@ -171,3 +171,23 @@ a.hsreplay-thumbnail:link, a.hsreplay-thumbnail:hover {
 .hsreplay-type {
 	width: 50%;
 }
+
+
+/* Styling for empty section */
+
+#my-games-empty {
+	text-align: center;
+}
+
+#my-games-claim-account {
+	a {
+		display: block;
+		margin: 1em auto;
+		width: 275px;
+
+		img {
+			border: 1px solid black;
+			width: 275px;
+		}
+	}
+}
