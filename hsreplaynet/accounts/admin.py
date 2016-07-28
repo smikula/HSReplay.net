@@ -12,3 +12,4 @@ class AccountClaimAdmin(admin.ModelAdmin):
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
 	change_form_template = "loginas/change_form.html"
+	list_display = BaseUserAdmin.list_display + ("date_joined", "last_login")
