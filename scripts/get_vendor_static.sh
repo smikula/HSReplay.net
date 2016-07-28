@@ -57,3 +57,11 @@ SOURCE="https://cdn.ravenjs.com/$VERSION/$PKGNAME.min.js"
 OUTFILE="$STATICDIR/$PKGNAME.min.js"
 
 wget "$SOURCE" -O "$OUTFILE"
+
+
+# Hearthstone enums
+
+SOURCE="https://api.hearthstonejson.com/v1/enums.d.ts"
+OUTFILE="$STATICDIR/../scripts/src/hearthstone.d.ts"
+
+wget "$SOURCE" -O "$OUTFILE"

@@ -22,7 +22,7 @@ module.exports = {
 				test: /\.tsx?$/,
 				loaders: [
 					"babel-loader?presets[]=react&presets[]=es2015",
-					"awesome-typescript-loader",
+					"awesome-typescript-loader?disableFastEmit=true",
 				],
 			}
 		],
