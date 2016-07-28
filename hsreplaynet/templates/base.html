@@ -28,7 +28,7 @@
 	<script type="text/javascript" src="{% static 'vendor/react-dom.min.js' %}"></script>
 	{% endblock %}
 </head>
-<body>
+<body {% if user.is_authenticated %}data-username="{{user.username}}"{% endif %}>
 	<header>
 	{% block header %}
 		<nav>
