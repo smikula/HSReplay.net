@@ -7,7 +7,7 @@ from django.db import models
 from django.dispatch.dispatcher import receiver
 from django.urls import reverse
 from django.utils.timezone import now
-from hearthstone.enums import BnetGameType, PlayState
+from hearthstone.enums import BnetGameType, FormatType, PlayState
 from hsreplaynet.api.models import AuthToken
 from hsreplaynet.cards.models import Card, Deck
 from hsreplaynet.utils.fields import IntEnumField, PlayerIDField, ShortUUIDField
@@ -69,8 +69,8 @@ class GlobalGame(models.Model):
 		"Match end", help_text="Must be a timezone aware datetime."
 	)
 
-	# The BnetGameType enum encodes whether it's ranked or casual as well as standard or wild.
 	game_type = IntEnumField("Game type", enum=BnetGameType, null=True, blank=True)
+	format = IntEnumField("Format type", enum=FormatType, default=FormatType.FT_UNKNOWN)
 
 	# ladder_season is nullable since not all games are ladder games
 	ladder_season = models.IntegerField(

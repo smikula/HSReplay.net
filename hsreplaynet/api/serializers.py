@@ -125,6 +125,7 @@ class UploadEventSerializer(serializers.Serializer):
 
 	file = SmartFileField(write_only=True)
 	game_type = serializers.IntegerField(default=0, write_only=True)
+	format = serializers.IntegerField(required=False, write_only=True)
 	build = serializers.IntegerField(write_only=True)
 	match_start = serializers.DateTimeField(write_only=True)
 	friendly_player = serializers.IntegerField(required=False, min_value=1, max_value=2, write_only=True)

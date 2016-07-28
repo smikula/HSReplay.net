@@ -35,6 +35,7 @@ def eligible_for_unification(meta):
 def find_or_create_global_game(game_tree, meta):
 	game_handle = meta.get("game_handle")
 	game_type = meta.get("game_type", 0)
+	format = meta.get("format", 0)
 	start_time = game_tree.start_time
 	end_time = game_tree.end_time
 	if "stats" in meta and "ranked_season_stats" in meta["stats"]:
@@ -66,6 +67,7 @@ def find_or_create_global_game(game_tree, meta):
 		server_port=meta.get("server_port"),
 		server_version=meta.get("server_version"),
 		game_type=game_type,
+		format=format,
 		build=meta["build"],
 		match_start=start_time,
 		match_end=end_time,
