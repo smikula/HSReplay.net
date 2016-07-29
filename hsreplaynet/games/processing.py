@@ -140,7 +140,52 @@ def process_upload_event(upload_event):
 		upload_event.status = UploadEventStatus.SUCCESS
 		upload_event.save()
 
+		capture_class_distribution_stats(replay)
+
 	return replay
+
+
+def capture_class_distribution_stats(replay):
+	fields = {
+		"num_turns": None,
+		"winning_class": None,
+		"winning_rank": None,
+		"loosing_class": None,
+		"loosing_rank": None,
+	}
+
+	tags = {
+		"winning_rank": None,
+		"loosing_rank": None,
+		"region": None,
+		"winning_deck_digest": None,
+		"winning_class_name": None,
+		"loosing_deck_digest": None,
+		"loosing_class_name": None,
+	}
+
+	players = replay.global_game.players.all()
+
+	if len(players) == 2 and any(p.won for p in players):
+		# Only capture stats if it's a typical game with a winner and looser.
+
+		fields["num_turns"] = replay.global_game.num_turns
+
+		for player in players:
+			if player.won:
+				fields["winning_class"] = player.hero.card_class.value
+				fields["winning_rank"] = player.rank
+				tags["region"] = player.account_hi
+				tags["winning_deck_digest"] = player.deck_list.digest
+				tags["winning_class_name"] = player.hero.card_class.name
+			else:
+				fields["loosing_class"] = player.hero.card_class.value
+				fields["loosing_rank"] = player.rank
+				tags["loosing_deck_digest"] = player.deck_list.digest
+				tags["loosing_class_name"] = player.hero.card_class.name
+
+		influx_metric("class_distribution_stats", fields=fields, **tags)
+
 
 
 def parse_upload_event(upload_event, meta):
