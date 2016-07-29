@@ -135,7 +135,9 @@ else:
 
 def influx_write_payload(payload):
 	try:
-		influx.write_points(payload)
+		result = influx.write_points(payload)
+		if not result:
+			logger.warn("Influx Write Failure.")
 	except Exception as e:
 		# Can happen if Influx if not available for example
 		error_handler(e)
