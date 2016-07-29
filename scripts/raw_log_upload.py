@@ -20,7 +20,7 @@ HOST = "https://upload.hsreplay.net/api/v1/replay/upload/request"
 api_key = args.api_key if args.api_key else os.environ.get("HSREPLAYNET_API_KEY", None)
 auth_token = args.auth_token if args.auth_token else os.environ.get("HSREPLAYNET_AUTH_TOKEN", None)
 
-HEADERS = {
+request_one_headers = {
 	"X-Api-Key": api_key,
 	"Authorization": "Token %s" % (auth_token),
 }
@@ -33,15 +33,19 @@ else:
 		"match_start": datetime.now().isoformat()
 	}
 
-response_one = requests.post(HOST, json=metadata, headers=HEADERS).json()
+response_one = requests.post(HOST, json=metadata, headers=request_one_headers).json()
+descriptor = requests.get(response_one["descriptor_url"]).content.decode("utf8")
 
 log = open(args.log_path).read()
 
-response_two = requests.put(response_one["put_url"], data=log)
+request_two_headers = {
+	"Content-Type": "text/plain"
+}
 
+response_two = requests.put(response_one["put_url"], data=log, headers=request_two_headers)
+
+print("PUT Response Code: %s" % response_two.status_code)
 print("Replay ID: %s" % response_one["upload_shortid"])
 print("Put URL:\n%s" % response_one["put_url"])
 print("Descriptor URL:\n%s" % response_one["descriptor_url"])
-
-descriptor = requests.get(response_one["descriptor_url"]).json()
-print(json.dumps(descriptor, sort_keys=True, indent=4))
+print(descriptor)
