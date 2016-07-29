@@ -89,9 +89,7 @@
 	<script type="text/javascript">
 		if(Raven) {
 			Raven.config("{{ dsn }}", {
-				{% comment %} Replace this once raven-js can handle the environment key in config
-				See https://github.com/getsentry/raven-js/issues/660 {% endcomment %}
-				{% if environment %}dataCallback: function(data) { data.environment = "{{ environment }}"; }{% endif %}
+				{% if environment %}environment: "{{ environment }}",{% endif %}
 			}).install();
 			Raven.setExtraContext({
 				replay_xml_url: "{{ replay.replay_xml.url|safe }}",

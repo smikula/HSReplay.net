@@ -52,7 +52,7 @@ wget "$SOURCE" -O "$OUTFILE"
 # Raven
 
 PKGNAME="raven"
-VERSION="3.2.1"
+VERSION="3.3.0"
 SOURCE="https://cdn.ravenjs.com/$VERSION/$PKGNAME.min.js"
 OUTFILE="$STATICDIR/$PKGNAME.min.js"
 
