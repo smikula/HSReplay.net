@@ -1,9 +1,9 @@
 import * as React from "react";
 import GameHistoryItem from "./GameHistoryItem";
-import {GameReplay} from "../interfaces";
+import {GameReplay, CardArtProps, ImageProps} from "../interfaces";
 
 
-interface GameHistoryListProps extends React.ClassAttributes<GameHistoryList> {
+interface GameHistoryListProps extends ImageProps, CardArtProps, React.ClassAttributes<GameHistoryList> {
 	games: GameReplay[];
 }
 
@@ -18,11 +18,13 @@ export default class GameHistoryList extends React.Component<GameHistoryListProp
 	render(): JSX.Element {
 		return <div class="row">
 			{this.props.games.map(
-				function(game: GameReplay, i: number) {
+				(game: GameReplay, i: number) => {
 					var startTime: Date = new Date(game.global_game.match_start);
 					var endTime: Date = new Date(game.global_game.match_end);
 					return <GameHistoryItem
 						key={i}
+						cardArt={this.props.cardArt}
+						image={this.props.image}
 						shortid={game.shortid}
 						players={game.global_game.players}
 						startTime={startTime}

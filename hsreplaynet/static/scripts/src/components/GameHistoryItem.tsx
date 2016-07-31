@@ -1,10 +1,10 @@
 import * as React from "react";
-import {GlobalGamePlayer} from "../interfaces";
+import {GlobalGamePlayer, ImageProps, CardArtProps} from "../interfaces";
 import GameHistoryPlayer from "./GameHistoryPlayer";
 import {PlayState} from "../hearthstone";
 
 
-interface GameHistoryItemProps extends React.ClassAttributes<GameHistoryItem> {
+interface GameHistoryItemProps extends ImageProps, CardArtProps, React.ClassAttributes<GameHistoryItem> {
 	shortid: string;
 	players: GlobalGamePlayer[];
 	startTime: Date;
@@ -15,7 +15,8 @@ interface GameHistoryItemProps extends React.ClassAttributes<GameHistoryItem> {
 	won: boolean;
 }
 
-interface GameHistoryItemState {}
+interface GameHistoryItemState {
+}
 
 function humanTime(seconds) {
 	// TODO: use something better
@@ -62,9 +63,14 @@ export default class GameHistoryItem extends React.Component<GameHistoryItemProp
 		return (<div className="col-xs-12 col-sm-6 col-md-4 col-lg-3 game-history-item">
 			<a href={"/replay/" + this.props.shortid} className={this.props.won ? "won" : "lost"}>
 				<div className="hsreplay-involved">
-					<img src={STATIC_URL + "images/vs.png"} className="hsreplay-versus"/>
-					{this.props.players.map(function(player, i) {
-						return <GameHistoryPlayer name={player.name} heroId={player.hero_id} won={player.final_state == PlayState.WON}/>;
+					<img src={this.props.image("vs.png")} className="hsreplay-versus"/>
+					{this.props.players.map((player: GlobalGamePlayer, i: number) => {
+						return <GameHistoryPlayer
+							cardArt={this.props.cardArt}
+							name={player.name}
+							heroId={player.hero_id}
+							won={player.final_state == PlayState.WON}
+						/>;
 					})}
 				</div>
 				<div className="hsreplay-details">

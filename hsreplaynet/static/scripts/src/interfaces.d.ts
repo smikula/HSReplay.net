@@ -47,3 +47,11 @@ export const enum Visibility {
 	Public = 1,
 	Unlisted = 2,
 }
+
+export interface ImageProps {
+	image: (string) => string;
+}
+
+export interface CardArtProps {
+	cardArt: (string) => string;
+}
