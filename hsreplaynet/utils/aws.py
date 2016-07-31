@@ -6,10 +6,12 @@ try:
 	S3 = boto3.client("s3")
 	SNS = boto3.client("sns")
 	LAMBDA = boto3.client("lambda")
+	IAM = boto3.client("iam")
 except ImportError:
 	S3 = None
 	SNS = None
 	LAMBDA = None
+	IAM = None
 
 
 def enable_processing_raw_uploads():

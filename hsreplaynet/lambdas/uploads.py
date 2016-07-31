@@ -23,7 +23,7 @@ def emulate_api_request(path, data, headers):
 	return request
 
 
-@instrumentation.lambda_handler
+@instrumentation.lambda_handler(name="ProcessS3CreateObjectV1")
 def process_s3_create_handler(event, context):
 	"""
 	A handler that is triggered whenever a "..power.log" suffixed object is created in S3.
@@ -39,7 +39,7 @@ def process_s3_create_handler(event, context):
 	process_raw_upload(raw_bucket, raw_key)
 
 
-@instrumentation.lambda_handler
+@instrumentation.lambda_handler(name="ProcessRawUploadSnsHandlerV1")
 def process_raw_upload_sns_handler(event, context):
 	"""
 	A handler that subscribes to an SNS queue to support reprocessing of raw log uploads.
@@ -159,7 +159,7 @@ def process_raw_upload(raw_bucket, raw_key):
 	return result
 
 
-@instrumentation.lambda_handler
+@instrumentation.lambda_handler(name="CreatePowerLogUploadEventV1")
 def create_power_log_upload_event_handler(event, context):
 	"""
 	A handler for creating UploadEvents via Lambda.
@@ -220,7 +220,7 @@ def create_upload_event_from_request(request):
 	}
 
 
-@instrumentation.lambda_handler
+@instrumentation.lambda_handler(cpu_seconds=120, name="ProcessUploadEventV1")
 def process_upload_event_handler(event, context):
 	"""
 	This handler is triggered by SNS whenever someone

@@ -71,46 +71,75 @@ def get_tracing_id(event):
 	return UNKNOWN_ID
 
 
-def lambda_handler(func):
+_lambda_descriptors = []
+
+
+def get_lambda_descriptors():
+	return _lambda_descriptors
+
+
+def lambda_handler(cpu_seconds=60, memory=128, name=None, handler=None):
 	"""Indicates the decorated function is a AWS Lambda handler.
 
 	The following standard lifecycle services are provided:
 		- Sentry reporting for all Exceptions that propagate
 		- Capturing a standard set of metrics for Influx
 		- Making sure all connections to the DB are closed
+		- Capturing metadata to facilicate deployment
+
+	Args:
+	    cpu_seconds - The maximum seconds the function should be allowed to run before it is terminated. Default: 60
+	    memory - The number of MB allocated to the lambda at runtime. Default: 128
+	    name - The name for the Lambda on AWS. Default: func.__name__
+	    handler - The entry point for the function. Default: handlers.<func.__name__>
 	"""
-	@wraps(func)
-	def wrapper(event, context):
-		tracing_id = get_tracing_id(event)
-		os.environ["TRACING_REQUEST_ID"] = tracing_id
-		if sentry:
-			# Provide additional metadata to sentry in case the exception
-			# gets trapped and reported within the function.
-			sentry.user_context({
-				"aws_log_group_name": getattr(context, "log_group_name"),
-				"aws_log_stream_name": getattr(context, "log_stream_name"),
-				"aws_function_name": getattr(context, "function_name"),
-				"tracing_id": tracing_id
-			})
 
-		try:
-			measurement = "%s_duration_ms" % (func.__name__)
-			with influx_timer(measurement, timestamp=now()):
-				return func(event, context)
+	def inner_lambda_handler(func):
 
-		except Exception as e:
-			logger.exception("Got an exception: %r", e)
+		global _lambda_descriptors
+
+		_lambda_descriptors.append({
+			"memory": memory,
+			"cpu_seconds": cpu_seconds,
+			"name": name if name else func.__name__,
+			"handler": handler if handler else "handlers.%s" % func.__name__
+		})
+
+		@wraps(func)
+		def wrapper(event, context):
+			tracing_id = get_tracing_id(event)
+			os.environ["TRACING_REQUEST_ID"] = tracing_id
 			if sentry:
-				logger.info("Inside sentry capture block.")
-				sentry.captureException()
-			else:
-				logger.info("Sentry is not available.")
-			raise
-		finally:
-			from django.db import connection
-			connection.close()
+				# Provide additional metadata to sentry in case the exception
+				# gets trapped and reported within the function.
+				sentry.user_context({
+					"aws_log_group_name": getattr(context, "log_group_name"),
+					"aws_log_stream_name": getattr(context, "log_stream_name"),
+					"aws_function_name": getattr(context, "function_name"),
+					"tracing_id": tracing_id
+				})
 
-	return wrapper
+			try:
+				measurement = "%s_duration_ms" % (func.__name__)
+				with influx_timer(measurement, timestamp=now()):
+					return func(event, context)
+
+			except Exception as e:
+				logger.exception("Got an exception: %r", e)
+				if sentry:
+					logger.info("Inside sentry capture block.")
+					sentry.captureException()
+				else:
+					logger.info("Sentry is not available.")
+				raise
+			finally:
+				from django.db import connection
+				connection.close()
+
+		return wrapper
+
+	return inner_lambda_handler
+
 
 
 if settings.INFLUX_ENABLED:

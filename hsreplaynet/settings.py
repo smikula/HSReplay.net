@@ -176,6 +176,7 @@ SNS_PROCESS_UPLOAD_EVENT_TOPIC = None
 JOUST_STATIC_URL = STATIC_URL + "joust/"
 HEARTHSTONEJSON_URL = "https://cdn.hearthstonejson.com/v1/%(build)s/%(locale)s/cards.json"
 
+LAMBDA_DEFAULT_EXECUTION_ROLE_NAME="lambda_s3_exec_role"
 
 # Email
 # https://docs.djangoproject.com/en/1.9/ref/settings/#email-backend

@@ -4,7 +4,11 @@ from hsreplaynet.api.models import AuthToken
 from hsreplaynet.utils import instrumentation
 
 
-@instrumentation.lambda_handler
+@instrumentation.lambda_handler(
+	cpu_seconds=30,
+	name="ReplayUploadAuthorizer",
+	handler="handlers.token_authorizer"
+)
 def api_gateway_authorizer(event, context):
 	logger = logging.getLogger("hsreplaynet.lambdas.authorizer")
 
