@@ -1,6 +1,17 @@
 const path = require("path");
 const webpack = require("webpack");
 const BundleTracker = require("webpack-bundle-tracker");
+const fs = require("fs");
+const {execSync} = require("child_process");
+
+const exportSettings = ["STATIC_URL", "JOUST_STATIC_URL"];
+const exportedSettings = JSON.parse(
+	execSync("python ./manage.py show_settings " + exportSettings.join(" "))
+);
+const settings = Object.keys(exportedSettings).reduce((obj, current) => {
+	obj[current] = JSON.stringify(exportedSettings[current]);
+	return obj;
+}, {});
 
 module.exports = {
 	context: __dirname,
@@ -34,5 +45,6 @@ module.exports = {
 	},
 	plugins: [
 		new BundleTracker({filename: "./build/webpack-stats.json"}),
+		new webpack.DefinePlugin(settings),
 	],
 };

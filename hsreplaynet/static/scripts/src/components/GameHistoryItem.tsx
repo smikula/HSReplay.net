@@ -50,10 +50,10 @@ export default class GameHistoryItem extends React.Component<GameHistoryItemProp
 
 	getIcon(): JSX.Element {
 		if (this.props.disconnected) {
-			return <img src="/static/images/dc.png" className="hsreplay-type" alt="Disconnected"/>;
+			return <img src={STATIC_URL + "images/dc.png"} className="hsreplay-type" alt="Disconnected"/>;
 		}
 		if (this.props.gameType == 16) {
-			return <img src="/static/images/brawl.png" className="hsreplay-type" alt="Tavern Brawl"/>;
+			return <img src={STATIC_URL + "images/brawl.png"} className="hsreplay-type" alt="Tavern Brawl"/>;
 		}
 		return null;
 	}
@@ -62,7 +62,7 @@ export default class GameHistoryItem extends React.Component<GameHistoryItemProp
 		return (<div className="col-xs-12 col-sm-6 col-md-4 col-lg-3 game-history-item">
 			<a href={"/replay/" + this.props.shortid} className={this.props.won ? "won" : "lost"}>
 				<div className="hsreplay-involved">
-					<img src="/static/images/vs.png" className="hsreplay-versus"/>
+					<img src={STATIC_URL + "images/vs.png"} className="hsreplay-versus"/>
 					{this.props.players.map(function(player, i) {
 						return <GameHistoryPlayer name={player.name} heroId={player.hero_id} won={player.final_state == PlayState.WON}/>;
 					})}

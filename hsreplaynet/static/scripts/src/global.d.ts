@@ -8,3 +8,6 @@ declare module "clipboard" {
 		on(event: string, func: any): any;
 	}
 }
+
+declare var STATIC_URL;
+declare var JOUST_STATIC_URL;
