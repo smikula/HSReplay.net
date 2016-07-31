@@ -14,6 +14,15 @@ except ImportError:
 	IAM = None
 
 
+def get_sns_topic_arn_from_name(name):
+	response = SNS.list_topics()
+	topics = response["Topics"]
+
+	for topic in response["Topics"]:
+		if topic["TopicArn"].split(":")[-1] == name:
+			return topic["TopicArn"]
+
+
 def enable_processing_raw_uploads():
 	processing_lambda = LAMBDA.get_function(FunctionName="ProcessS3CreateObjectV1")
 	S3.put_bucket_notification_configuration(

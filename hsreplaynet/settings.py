@@ -169,8 +169,7 @@ if ENV_PROD:
 # WARNING: To change this it must also be updated in isolated.uploaders.py
 S3_RAW_LOG_UPLOAD_BUCKET = "hsreplaynet-raw-log-uploads"
 
-# Production values for the following topics come from local_settings.py
-SNS_PROCESS_RAW_LOG_UPOAD_TOPIC = None
+SNS_PROCESS_RAW_LOG_UPOAD_TOPIC = "process_s3_raw_upload"
 SNS_PROCESS_UPLOAD_EVENT_TOPIC = None
 
 JOUST_STATIC_URL = STATIC_URL + "joust/"

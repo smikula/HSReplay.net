@@ -27,6 +27,12 @@ def queue_raw_uploads_for_processing():
 
 	This method can also be used to recover from a service outage.
 	"""
+
+	topic_arn = aws.get_sns_topic_arn_from_name(settings.SNS_PROCESS_RAW_LOG_UPOAD_TOPIC)
+
+	if topic_arn is None:
+		raise Exception("A Topic for queueing raw uploads is not configured.")
+
 	for object in aws.list_all_objects_in(settings.S3_RAW_LOG_UPLOAD_BUCKET, prefix="raw"):
 		key = object["Key"]
 		if key.endswith("power.log"):  # Don't queue the descriptor files, just the logs.
@@ -36,7 +42,7 @@ def queue_raw_uploads_for_processing():
 				"raw_key": key,
 			}
 
-			aws.publish_sns_message(settings.SNS_PROCESS_RAW_LOG_UPOAD_TOPIC, message)
+			aws.publish_sns_message(topic_arn, message)
 
 
 def queue_upload_event_for_processing(upload_event_id):
