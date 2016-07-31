@@ -39,8 +39,6 @@ export default class GameHistoryItem extends React.Component<GameHistoryItemProp
 
 	getDuration(): string {
 		var seconds = this.props.endTime.getTime() - this.props.startTime.getTime();
-		console.log(this.props.startTime, this.props.startTime.getTime());
-		console.log(this.props.endTime, this.props.endTime.getTime());
 		return humanTime(seconds / 1000);
 	}
 
