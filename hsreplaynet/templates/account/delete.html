@@ -11,7 +11,7 @@
 
 	<p>
 		Once your data is gone, it's irreversible. Are you sure?
-		<form action="" method="POST" onsubmit="confirm('Are you *really* sure?')">
+		<form action="" method="POST" onsubmit="return confirm('Are you *really* sure?')">
 			{% csrf_token %}
 			<div class="checkbox">
 				<label>
