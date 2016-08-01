@@ -5,7 +5,7 @@ const fs = require("fs");
 const {spawnSync} = require("child_process");
 
 
-const exportSettings = ["STATIC_URL", "JOUST_STATIC_URL"];
+const exportSettings = ["STATIC_URL", "JOUST_STATIC_URL", "JOUST_RAVEN_DSN_PUBLIC", "HEARTHSTONEJSON_URL"];
 const managePy = path.resolve(__dirname, "./manage.py")
 const exportedSettings = JSON.parse(
 	spawnSync(managePy, ["show_settings"].concat(exportSettings), {encoding: "utf-8"}).stdout
@@ -45,6 +45,7 @@ module.exports = {
 		"react": "React",
 		"react-dom": "ReactDOM",
 		"jquery": "jQuery",
+		"joust": "Joust",
 	},
 	plugins: [
 		new BundleTracker({path: __dirname, filename: "./build/webpack-stats.json"}),
