@@ -1,14 +1,12 @@
 import json
 import logging
 import tempfile
-import re
-from datetime import datetime
 from base64 import b64decode
 from django.conf import settings
 from django.contrib.sessions.middleware import SessionMiddleware
 from rest_framework.test import APIRequestFactory
 from hsreplaynet.api.views import UploadEventViewSet
-from hsreplaynet.uploads.models import UploadEvent, UploadEventType, _generate_upload_key
+from hsreplaynet.uploads.models import UploadEvent, UploadEventType, RawUpload, _generate_upload_key
 from hsreplaynet.uploads.processing import queue_upload_event_for_processing
 from hsreplaynet.utils import instrumentation, aws
 
@@ -29,14 +27,11 @@ def process_s3_create_handler(event, context):
 	A handler that is triggered whenever a "..power.log" suffixed object is created in S3.
 	"""
 	logger = logging.getLogger("hsreplaynet.lambdas.process_s3_create_handler")
-	logger.info("***** EVENT INFO *****")
-	logger.info(json.dumps(event, sort_keys=True, indent=4))
 
-	s3_record = event["Records"][0]["s3"]
-	raw_bucket = s3_record["bucket"]["name"]
-	raw_key = s3_record["object"]["key"]
-	logger.info("S3 Upload Event >> Bucket: %s Key: %s ", raw_bucket, raw_key)
-	process_raw_upload(raw_bucket, raw_key)
+	s3_event = event["Records"][0]["s3"]
+	raw_upload = RawUpload.from_s3_event(s3_event)
+	logger.info("Processing a RawUpload from an S3 event: %s", str(raw_upload))
+	process_raw_upload(raw_upload)
 
 
 @instrumentation.lambda_handler(name="ProcessRawUploadSnsHandlerV1")
@@ -47,46 +42,27 @@ def process_raw_upload_sns_handler(event, context):
 	logger = logging.getLogger("hsreplaynet.lambdas.process_raw_upload_sns_handler")
 
 	message = json.loads(event["Records"][0]["Sns"]["Message"])
-	logger.info("SNS message: %r", message)
-	raw_bucket = message["raw_bucket"]
-	raw_key = message["raw_key"]
-	process_raw_upload(raw_bucket, raw_key)
+	raw_upload = RawUpload.from_sns_message(message)
+	logger.info("Processing a RawUpload from an SNS message: %s", str(raw_upload))
+	process_raw_upload(raw_upload)
 
 
-def process_raw_upload(raw_bucket, raw_key):
+def process_raw_upload(raw_upload):
 	"""A method for processing a raw upload in S3.
 
 	This will usually be invoked by process_s3_create_handler, however
 	it can also be invoked when a raw upload is queued for reprocessing via SNS.
 	"""
 	logger = logging.getLogger("hsreplaynet.lambdas.process_raw_upload")
-	pattern = r"raw/(?P<ts>\d{4}/\d{2}/\d{2}/\d{2}/\d{2})/(?P<shortid>\w{22})\.power.log"
-	match = re.match(pattern, raw_key)
+	logger.info("Starting processing for RawUpload: %s", str(raw_upload))
 
-	if not match:
-		logger.info("ERROR: We failed to match against the S3 Key - no processing was done.")
-		return
+	descriptor = raw_upload.descriptor
 
-	timestamp, shortid = match.groups()
-	ts = datetime.strptime(timestamp, "%Y/%m/%d/%H/%M")
-
-	logger.info("Timestamp: %s", timestamp)
-	logger.info("ShortID: %s", shortid)
-
-	descriptor_key = "raw/%s/%s.descriptor.json" % (timestamp, shortid)
-	logger.info("Descriptor Key: %s", descriptor_key)
-
-	obj = aws.S3.get_object(Bucket=raw_bucket, Key=descriptor_key)
-	descriptor = json.load(obj["Body"])
-
-	logger.info("***** COMPLETE DESCRIPTOR *****")
-	logger.info(json.dumps(descriptor, sort_keys=True, indent=4))
-
-	new_key = _generate_upload_key(ts, shortid)
+	new_key = _generate_upload_key(raw_upload.timestamp, raw_upload.shortid)
 	new_bucket = settings.AWS_STORAGE_BUCKET_NAME
 
 	# First we copy the log to the proper location
-	copy_source = "%s/%s" % (raw_bucket, raw_key)
+	copy_source = "%s/%s" % (raw_upload.bucket, raw_upload.log_key)
 
 	logger.info("*** COPY RAW LOG TO NEW LOCATION ***")
 	logger.info("SOURCE: %s" % copy_source)
@@ -105,9 +81,6 @@ def process_raw_upload(raw_bucket, raw_key):
 	upload_metadata["file"] = new_key
 	upload_metadata["type"] = int(UploadEventType.POWER_LOG)
 
-	logger.info("***** UPLOADED METADATA *****")
-	logger.info(json.dumps(upload_metadata, sort_keys=True, indent=4))
-
 	gateway_headers = descriptor["gateway_headers"]
 	headers = {
 		"HTTP_X_FORWARDED_FOR": descriptor["source_ip"],
@@ -116,46 +89,30 @@ def process_raw_upload(raw_bucket, raw_key):
 		"format": "json",
 	}
 
-	logger.info("***** HEADERS *****")
-	logger.info(json.dumps(headers, sort_keys=True, indent=4))
-
 	path = descriptor["event"]["path"]
-	logger.info("REQUEST Path: %s", path)
-
 	request = emulate_api_request(path, upload_metadata, headers)
 
 	try:
 		result = create_upload_event_from_request(request)
 	except Exception as e:
-		# If DRF fails: delete the copy of the log, and update the descriptor.
-		# We update the descriptor as a way to pass status
-		# info back to the client that uploaded it.
-		logger.exception(e)
+		logger.info("Create Upload Event Failed!!")
+
+		# If DRF fails: delete the copy of the log to not leave orphans around.
 		aws.S3.delete_object(Bucket=new_bucket, Key=new_key)
 
-		result_exception_json = json.loads(str(e))
-		descriptor["UPLOAD_ERROR"] = result_exception_json
-		descriptor["UPLOAD_ERROR_TS"] = datetime.now().isoformat()
-		aws.S3.put_object(
-			Key=descriptor_key,
-			Body=json.dumps(descriptor).encode("utf8"),
-			Bucket=raw_bucket,
-		)
+		# Now move the failed upload into the failed location for easier inspection.
+		raw_upload.make_failed(str(e))
+		logger.info("RawUpload has been marked failed: %s", str(raw_upload))
 
 		raise
+
 	else:
-		logger.info("Create Upload Event Request Succeeded.")
-		logger.info("Raw log and descriptor will be deleted now.")
+		logger.info("Create Upload Event Success - RawUpload will be deleted.")
 
-		# If DRF returns success, then we delete the descriptor and log from raw uploads
-		aws.S3.delete_objects(
-			Bucket=raw_bucket,
-			Delete={
-				"Objects": [{"Key": raw_key}, {"Key": descriptor_key}]
-			}
-		)
+		# If DRF returns success, then we delete the raw_upload
+		raw_upload.delete()
 
-	logger.info("Processing Complete.")
+	logger.info("Processing RawUpload Complete.")
 	return result
 
 

@@ -39,9 +39,13 @@ def enable_processing_raw_uploads():
 						"Key": {
 							"FilterRules": [
 								{
-									"Value": "power.log",
-									"Name": "Suffix"
-								}
+									"Name": "suffix",
+									"Value": "power.log"
+								},
+								{
+									"Name": "prefix",
+									"Value": "raw"
+                            	},
 							]
 						}
 					}

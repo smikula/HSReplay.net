@@ -8,7 +8,7 @@ import logging
 import os
 from django.conf import settings
 from django.utils.timezone import now
-from hsreplaynet.uploads.models import UploadEvent
+from hsreplaynet.uploads.models import UploadEvent, RawUpload
 from hsreplaynet.utils.instrumentation import error_handler, influx_metric
 from hsreplaynet.utils import aws
 
@@ -17,7 +17,7 @@ logger = logging.getLogger(__file__)
 
 def queue_raw_uploads_for_processing():
 	"""
-	Requeue all raw logs to attempt processing them into UploadEvents.
+	Queue all raw logs to attempt processing them into UploadEvents.
 
 	The primary use for this is for when we deploy code. The intended deploy process is:
 		- Notify S3 to suspend triggering lambda upon log upload
@@ -25,8 +25,11 @@ def queue_raw_uploads_for_processing():
 		- Notify S3 to resume triggering lambda upon log upload
 		- Invoke this function to queue for processing any logs uploaded during the deploy
 
-	This method can also be used to recover from a service outage.
+	This method is not intended to requeue uploads that have previously failed. For that see the
+	requeue_failed_* family of methods.
 	"""
+
+	logger.info("Starting - Queue all raw uploads for processing")
 
 	topic_arn = aws.get_sns_topic_arn_from_name(settings.SNS_PROCESS_RAW_LOG_UPOAD_TOPIC)
 
@@ -37,12 +40,85 @@ def queue_raw_uploads_for_processing():
 		key = object["Key"]
 		if key.endswith("power.log"):  # Don't queue the descriptor files, just the logs.
 
-			message = {
-				"raw_bucket": settings.S3_RAW_LOG_UPLOAD_BUCKET,
-				"raw_key": key,
-			}
+			raw_upload = RawUpload(settings.S3_RAW_LOG_UPLOAD_BUCKET, key)
+			logger.info("About to queue: %s" % str(raw_upload))
 
-			aws.publish_sns_message(topic_arn, message)
+			aws.publish_sns_message(topic_arn, raw_upload.sns_message)
+
+
+def check_for_failed_raw_upload_with_id(shortid):
+	"""
+	Will return any error data provided by DRF when a raw upload fails processing.
+
+	This method can be used to embed error info for admins on replay detail pages.
+
+	Args:
+		shortid - The shortid to check for an error.
+	"""
+	prefix = "failed/%s" % shortid
+	matching_uploads = _list_raw_uploads_by_prefix(prefix)
+	if len(matching_uploads) > 0:
+		return matching_uploads[0]
+	else:
+		return None
+
+
+def list_all_failed_raw_log_uploads():
+	"""Return a generator over all failed RawUpload objects."""
+	return _list_raw_uploads_by_prefix("failed")
+
+
+def _list_raw_uploads_by_prefix(prefix):
+	for object in aws.list_all_objects_in(settings.S3_RAW_LOG_UPLOAD_BUCKET, prefix=prefix):
+		key = object["Key"]
+		if key.endswith("power.log"):  # Just emit one message per power.log
+			yield RawUpload(settings.S3_RAW_LOG_UPLOAD_BUCKET, key)
+
+
+def requeue_failed_raw_uploads_all():
+	"""
+	Requeue all failed raw logs to attempt processing them into UploadEvents.
+	"""
+	return _requeue_failed_raw_uploads_by_prefix("failed")
+
+
+def requeue_failed_raw_single_upload_with_id(shortid):
+	"""
+	Requeue a specific failed shortid to attempt processing it into an UploadEvent.
+	"""
+	prefix = "failed/%s" % shortid
+	return _requeue_failed_raw_uploads_by_prefix(prefix)
+
+
+def requeue_failed_raw_logs_uploaded_after(cutoff):
+	"""
+	Requeue all failed raw logs that were uploaded more recently than the provided timestamp.
+
+	Args:
+	    cutoff - Will requeue failed uploads more recent than this datetime
+	"""
+	prefix = "failed"
+	for raw_upload in _list_raw_uploads_by_prefix(prefix):
+		if raw_upload.timestamp >= cutoff:
+			_publish_requeue_message_for_failed_raw_log(raw_upload)
+
+
+def _requeue_failed_raw_uploads_by_prefix(prefix):
+	"""
+	Requeue all failed raw logs to attempt processing them into UploadEvents.
+	"""
+	for raw_upload in _list_raw_uploads_by_prefix(prefix):
+		_publish_requeue_message_for_failed_raw_log(raw_upload)
+
+
+def _publish_requeue_message_for_failed_raw_log(raw_upload):
+
+	topic_arn = aws.get_sns_topic_arn_from_name(settings.SNS_PROCESS_RAW_LOG_UPOAD_TOPIC)
+
+	if topic_arn is None:
+		raise Exception("A Topic for queueing raw uploads is not configured.")
+
+	aws.publish_sns_message(topic_arn, raw_upload.sns_message)
 
 
 def queue_upload_event_for_processing(upload_event_id):
@@ -61,7 +137,7 @@ def queue_upload_event_for_processing(upload_event_id):
 
 		message = {
 			"id": upload_event_id,
-			"token": token,
+			"token": token
 		}
 
 		success = True

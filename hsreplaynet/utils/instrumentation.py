@@ -7,6 +7,7 @@ from functools import wraps
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.timezone import now
+from hsreplaynet.uploads.models import RawUpload
 from . import logger
 
 
@@ -23,12 +24,6 @@ def error_handler(e):
 		logger.exception(e)
 
 
-def get_token_from_key(key):
-	RAW_KEY_PATTERN = r"raw/(?P<timestamp>\d{4}/\d{2}/\d{2}/\d{2}/\d{2})/(?P<shortid>\w{22})\.power.log"
-	match = re.match(RAW_KEY_PATTERN, key)
-	return match.groupdict()["shortid"]
-
-
 def get_tracing_id(event):
 	"""
 	Returns the Authorization token as a unique identifier.
@@ -40,9 +35,9 @@ def get_tracing_id(event):
 			# We are in a lambda triggered via SNS
 			message = json.loads(event["Records"][0]["Sns"]["Message"])
 
-			if "raw_key" in message:
+			if "shortid" in message:
 				# We are in a lambda to process a raw s3 upload
-				return get_token_from_key(message["raw_key"])
+				return message["shortid"]
 			elif "token" in message:
 				# We are in a lambda for processing an upload event
 				return message["token"]
@@ -51,8 +46,9 @@ def get_tracing_id(event):
 
 		elif "s3" in event["Records"][0]:
 			# We are in the process_s3_object Lambda
-			s3_record = event['Records'][0]['s3']
-			return get_token_from_key(s3_record['object']['key'])
+			s3_event = event['Records'][0]['s3']
+			raw_upload = RawUpload.from_s3_event(s3_event)
+			return raw_upload.shortid
 
 	auth_header = None
 
