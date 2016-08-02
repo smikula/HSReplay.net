@@ -173,7 +173,7 @@ SNS_PROCESS_RAW_LOG_UPOAD_TOPIC = "process_s3_raw_upload"
 SNS_PROCESS_UPLOAD_EVENT_TOPIC = None
 
 JOUST_STATIC_URL = STATIC_URL + "joust/"
-HEARTHSTONEJSON_URL = "https://cdn.hearthstonejson.com/v1/%(build)s/%(locale)s/cards.json"
+HEARTHSTONEJSON_URL = "https://api.hearthstonejson.com/v1/%(build)s/%(locale)s/cards.json"
 
 LAMBDA_DEFAULT_EXECUTION_ROLE_NAME="lambda_s3_exec_role"
 
