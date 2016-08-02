@@ -77,13 +77,14 @@ def list_all_objects_in(bucket, prefix=None):
 		Bucket=bucket,
 		Prefix=prefix,
 	)
-	objects = list_response["Contents"]
-	while objects:
-		yield objects.pop(0)
-		if list_response["IsTruncated"] and not objects:
-			list_response = S3.list_objects_v2(
-				Bucket=bucket,
-				Prefix=prefix,
-				ContinuationToken=list_response["NextContinuationToken"]
-			)
-			objects += list_response["Contents"]
+	if list_response["KeyCount"] > 0:
+		objects = list_response["Contents"]
+		while objects:
+			yield objects.pop(0)
+			if list_response["IsTruncated"] and not objects:
+				list_response = S3.list_objects_v2(
+					Bucket=bucket,
+					Prefix=prefix,
+					ContinuationToken=list_response["NextContinuationToken"]
+				)
+				objects += list_response["Contents"]
