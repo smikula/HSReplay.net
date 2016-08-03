@@ -37,7 +37,7 @@ def process_s3_create_handler(event, context):
 @instrumentation.lambda_handler(name="ProcessRawUploadSnsHandlerV1")
 def process_raw_upload_sns_handler(event, context):
 	"""
-	A handler that subscribes to an SNS queue to support reprocessing of raw log uploads.
+	A handler that subscribes to an SNS queue to support processing of raw log uploads.
 	"""
 	logger = logging.getLogger("hsreplaynet.lambdas.process_raw_upload_sns_handler")
 
@@ -114,40 +114,6 @@ def process_raw_upload(raw_upload):
 
 	logger.info("Processing RawUpload Complete.")
 	return result
-
-
-@instrumentation.lambda_handler(name="CreatePowerLogUploadEventV1")
-def create_power_log_upload_event_handler(event, context):
-	"""
-	A handler for creating UploadEvents via Lambda.
-	"""
-	logger = logging.getLogger("hsreplaynet.lambdas.create_power_log_upload_event_handler")
-
-	body = event.pop("body")
-	logger.info("source_ip=%r, query=%r", event["source_ip"], event["query"])
-
-	body = b64decode(body)
-	instrumentation.influx_metric("raw_power_log_upload_num_bytes", {"size": len(body)})
-
-	file = tempfile.NamedTemporaryFile(mode="r+b", suffix=".log")
-	file.write(body)
-	file.flush()
-	file.seek(0)
-
-	data = event["query"]
-	data["file"] = file
-	data["type"] = int(UploadEventType.POWER_LOG)
-
-	gateway_headers = event["headers"]
-	headers = {
-		"HTTP_X_FORWARDED_FOR": event["source_ip"],
-		"HTTP_AUTHORIZATION": gateway_headers["Authorization"],
-		"HTTP_X_API_KEY": gateway_headers["X-Api-Key"],
-	}
-
-	path = event["path"]
-	request = emulate_api_request(path, data, headers)
-	return create_upload_event_from_request(request)
 
 
 def create_upload_event_from_request(request):

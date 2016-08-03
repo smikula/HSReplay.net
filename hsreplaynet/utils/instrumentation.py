@@ -30,41 +30,29 @@ def get_tracing_id(event):
 	Used in the Lambda logging system to trace sessions.
 	"""
 	UNKNOWN_ID = "unknown-id"
-	if "Records" in event:
-		if "Sns" in event["Records"][0]:
-			# We are in a lambda triggered via SNS
-			message = json.loads(event["Records"][0]["Sns"]["Message"])
+	event_data = event["Records"][0]
 
-			if "shortid" in message:
-				# We are in a lambda to process a raw s3 upload
-				return message["shortid"]
-			elif "token" in message:
-				# We are in a lambda for processing an upload event
-				return message["token"]
-			else:
-				return UNKNOWN_ID
+	if "Sns" in event_data:
+		# We are in a lambda triggered via SNS
+		message = json.loads(event_data["Sns"]["Message"])
 
-		elif "s3" in event["Records"][0]:
-			# We are in the process_s3_object Lambda
-			s3_event = event['Records'][0]['s3']
-			raw_upload = RawUpload.from_s3_event(s3_event)
-			return raw_upload.shortid
+		if "shortid" in message:
+			# We are in a lambda to process a raw s3 upload
+			return message["shortid"]
+		elif "token" in message:
+			# We are in a lambda for processing an upload event
+			return message["token"]
+		else:
+			return UNKNOWN_ID
 
-	auth_header = None
+	elif "s3" in event_data:
+		# We are in the process_s3_object Lambda
+		s3_event = event_data['s3']
+		raw_upload = RawUpload.from_s3_event(s3_event)
+		return raw_upload.shortid
+	else:
 
-	if "authorizationToken" in event:
-		# We are in the Authorization Lambda
-		auth_header = event["authorizationToken"]
-
-	elif "headers" in event:
-		# We are in the create upload event Lambda
-		auth_header = event["headers"]["Authorization"]
-
-	if auth_header:
-		# The auth header is in the format 'Token <id>'
-		return auth_header.split()[1]
-
-	return UNKNOWN_ID
+		return UNKNOWN_ID
 
 
 _lambda_descriptors = []
