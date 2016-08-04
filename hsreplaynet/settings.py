@@ -11,7 +11,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BUILD_DIR = os.path.join(BASE_DIR, "build")
 
 
-ENV_LIVE = platform.node() == "hearthsim.net"
+ENV_LIVE = platform.node() in ["hsreplay.net", "hearthsim.net"]
 ENV_LAMBDA = bool(os.environ.get("AWS_LAMBDA_FUNCTION_NAME"))
 ENV_PROD = ENV_LIVE or ENV_LAMBDA
 ENV_DEV = not ENV_PROD
@@ -23,7 +23,7 @@ if ENV_DEV and not os.path.exists(BUILD_DIR):
 
 if ENV_PROD:
 	DEBUG = False
-	ALLOWED_HOSTS = ["hsreplay.net", "www.hsreplay.net"]
+	ALLOWED_HOSTS = ["hsreplay.net", "www.hsreplay.net", "staging.hsreplay.net"]
 else:
 	# SECURITY WARNING: don't run with debug turned on in production!
 	DEBUG = True
