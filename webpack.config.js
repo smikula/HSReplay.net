@@ -2,25 +2,28 @@ const path = require("path");
 const webpack = require("webpack");
 const BundleTracker = require("webpack-bundle-tracker");
 const fs = require("fs");
-const {execSync} = require("child_process");
+const {spawnSync} = require("child_process");
+
 
 const exportSettings = ["STATIC_URL", "JOUST_STATIC_URL"];
+const managePy = path.resolve(__dirname, "./manage.py")
 const exportedSettings = JSON.parse(
-	execSync("python ./manage.py show_settings " + exportSettings.join(" "))
+	spawnSync(managePy, ["show_settings"].concat(exportSettings), {encoding: "utf-8"}).stdout
 );
 const settings = Object.keys(exportedSettings).reduce((obj, current) => {
 	obj[current] = JSON.stringify(exportedSettings[current]);
 	return obj;
 }, {});
 
+
 module.exports = {
 	context: __dirname,
 	entry: {
-		my_replays: "./hsreplaynet/static/scripts/src/my_replays",
-		replay_detail: "./hsreplaynet/static/scripts/src/replay_detail",
+		my_replays: path.resolve(__dirname, "./hsreplaynet/static/scripts/src/my_replays"),
+		replay_detail: path.resolve(__dirname, "./hsreplaynet/static/scripts/src/replay_detail"),
 	},
 	output: {
-		path: path.resolve("./hsreplaynet/static/bundles/"),
+		path: path.resolve(__dirname, "./hsreplaynet/static/bundles/"),
 		filename: "[name]-[hash].js",
 	},
 	resolve: {
@@ -44,7 +47,7 @@ module.exports = {
 		"jquery": "jQuery",
 	},
 	plugins: [
-		new BundleTracker({filename: "./build/webpack-stats.json"}),
+		new BundleTracker({path: __dirname, filename: "./build/webpack-stats.json"}),
 		new webpack.DefinePlugin(settings),
 	],
 };
