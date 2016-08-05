@@ -21,6 +21,11 @@ if settings.DEBUG:
 	import subprocess
 
 	webpack_bin = os.path.join(settings.BASE_DIR, "node_modules/.bin/webpack")
+
+	# Windows can't execute "webpack"; it has to execute "webpack.cmd"
+	if os.name == "nt":
+		webpack_bin = webpack_bin + ".cmd"
+
 	webpack_config = os.path.join(settings.BASE_DIR, "webpack.config.js")
 	subprocess.Popen([
 		webpack_bin,
