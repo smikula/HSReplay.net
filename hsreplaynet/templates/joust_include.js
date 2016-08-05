@@ -45,7 +45,7 @@ $(document).ready(function() {
 			Joust.viewer("joust-promo-container")
 				.metadata(JoustExtra.metadata)
 				.assets("{% joust_static 'assets/' %}")
-				.cardArt("{% joust_static 'card-art/' %}")
+				.cardArt("{% setting 'HEARTHSTONE_ART_URL' %}")
 				.width("100%")
 				.height("100%")
 				.fromUrl("{{ featured_game.replay_xml.url|safe }}");

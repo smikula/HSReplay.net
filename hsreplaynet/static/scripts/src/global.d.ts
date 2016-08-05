@@ -10,4 +10,5 @@ declare module "clipboard" {
 }
 
 declare var STATIC_URL;
+declare var HEARTHSTONE_ART_URL;
 declare var JOUST_STATIC_URL;

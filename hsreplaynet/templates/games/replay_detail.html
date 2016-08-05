@@ -126,7 +126,7 @@
 		var launcher = Joust.launcher("joust-container")
 			.metadata(JoustExtra.metadata)
 			.assets("{% joust_static 'assets/' %}")
-			.cardArt("{% joust_static 'card-art/' %}")
+			.cardArt("{% setting 'HEARTHSTONE_ART_URL' %}")
 			.logger(function(error) {
 				{% if dsn %}Raven && Raven.captureException(error);{% endif %}
 				var message = error.message ? error.message : error;

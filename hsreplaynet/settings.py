@@ -175,6 +175,7 @@ SNS_PROCESS_UPLOAD_EVENT_TOPIC = None
 
 JOUST_STATIC_URL = STATIC_URL + "joust/"
 HEARTHSTONEJSON_URL = "https://api.hearthstonejson.com/v1/%(build)s/%(locale)s/cards.json"
+HEARTHSTONE_ART_URL = "https://art.hearthstonejson.com/cards/by-id/"
 
 LAMBDA_DEFAULT_EXECUTION_ROLE_NAME="lambda_s3_exec_role"
 

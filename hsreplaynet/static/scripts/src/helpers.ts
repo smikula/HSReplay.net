@@ -11,5 +11,5 @@ export function image(image: string) {
 }
 
 export function cardArt(cardArt: string) {
-	return joustStaticFile("card-art/" + cardArt) + ".jpg";
+	return HEARTHSTONE_ART_URL + cardArt + ".jpg";
 }
