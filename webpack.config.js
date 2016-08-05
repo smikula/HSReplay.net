@@ -10,7 +10,7 @@ const managePy = path.resolve(__dirname, "./manage.py")
 const exportedSettings = JSON.parse(
 	spawnSync(managePy, ["show_settings"].concat(exportSettings), {encoding: "utf-8"}).stdout
 );
-const settings = Object.keys(exportedSettings).reduce((obj, current) => {
+const settings = exportSettings.reduce((obj, current) => {
 	obj[current] = JSON.stringify(exportedSettings[current]);
 	return obj;
 }, {});
