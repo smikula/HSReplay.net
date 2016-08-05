@@ -1,16 +1,26 @@
+"use strict";
+
 const path = require("path");
 const webpack = require("webpack");
 const BundleTracker = require("webpack-bundle-tracker");
 const fs = require("fs");
-const {spawnSync} = require("child_process");
-
+const spawnSync = require("child_process").spawnSync;
 
 const exportSettings = [
 	"STATIC_URL", "JOUST_STATIC_URL", "HEARTHSTONE_ART_URL"
 ];
+
+const isWindows = /^win/.test(process.platform);
 const managePy = path.resolve(__dirname, "./manage.py")
+
+let spawnCommand = isWindows ? "python" : managePy;
+let spawnArgs = ["show_settings"].concat(exportSettings);
+if (isWindows) {
+	spawnArgs.splice(0, 0, managePy);
+}
+
 const exportedSettings = JSON.parse(
-	spawnSync(managePy, ["show_settings"].concat(exportSettings), {encoding: "utf-8"}).stdout
+	spawnSync(spawnCommand, spawnArgs, {encoding: "utf-8"}).stdout
 );
 const settings = exportSettings.reduce((obj, current) => {
 	obj[current] = JSON.stringify(exportedSettings[current]);
